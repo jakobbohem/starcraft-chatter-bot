@@ -1,0 +1,7 @@
+# Build orders:
+# LHS is a unit, RHS is a set of prerequisites
+# Right now, the prerequisite build is to the the first token (multiple ones with commas). The creation facility comes after the * character. The cost comes after the $ sign. 
+
+
+Marine <- Command Centre, Barracks * Barracks $ 50m
+Zergling <- Hatchery, Spawning Pool * Hatchery $ 25m

@@ -1,0 +1,12 @@
+# Comment line with instructions...
+# a tab separated list of keywords and tags for word tagging.
+# Hand coded or appended to!
+
+marine	unit
+zergling	unit
+barracks	building
+counter	action
+build	action
+why	question
+how	question
+when	question

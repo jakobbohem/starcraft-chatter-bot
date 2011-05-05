@@ -1,0 +1,12 @@
+# List of keywords (<- : separator) Reply in clear text.
+# Write unit names in singular, pluralis should be handled by the code
+
+Counter zergling <- This is a basic reply for counter zerglings (in text).
+This is a reply written in text.
+Counter zergling early game terran <- Build Marines from your Barracks.
+
+
+COUNTER ZERGLING EARLY GAME TERRAN <- MARINES
+HOW BUILD MARINES <- RESOURCE-COUNT(MARINES) BUILD-QUEUE(MARINES)
+MARINES <- RESOURCE-COUNT(MARINES) BUILD-QUEUE(MARINES)
+ZERGLINGS <- ZERGLING EARLY GAME TERRAN MARINES (some nonsense, eh?)
