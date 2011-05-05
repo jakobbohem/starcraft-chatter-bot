@@ -6,7 +6,7 @@ package postagger1;
 import java.util.*;
 
 /**
- *
+ * Testing harmless code submit through Netbeans SVN plugin
  * @author jakob
  */
 public class POStagger1 {
