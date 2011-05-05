@@ -9,7 +9,7 @@ import java.util.*;
  * Testing harmless code submit through Netbeans SVN plugin
  * @author jakob
  */
-public class POStagger1 {
+public class Bot {
 
     /**
      * @param args the command line arguments
