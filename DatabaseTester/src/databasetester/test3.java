@@ -231,4 +231,5 @@ public class test3 implements SQLite.Trace, SQLite.Profile {
 	    System.exit(1);
 	}
     }
+    
 }
