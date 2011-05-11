@@ -16,15 +16,13 @@ public class Bot {
      */
     public static void main(String[] args) {
         
-        
-        
-        //  Test saving an object to database
+        // Run basic database implementation test:
         DatabaseAccessor dba = new DatabaseAccessor();
-        ItemCard marineCard = new ItemCard("marine");
-        dba.writeln(marineCard, "some id string (to search for?)");
-        
-        Object fromDB = dba.read("marine");
-        ItemCard newItem = (ItemCard)fromDB;
+        DatabaseAccessor.test2(dba);
+                
+        // Test just READING from database:
+        ItemCard unit = (ItemCard)dba.read(1);
+        Tools.printCard(unit);
         
         // Run program
         int exitcode = 1;

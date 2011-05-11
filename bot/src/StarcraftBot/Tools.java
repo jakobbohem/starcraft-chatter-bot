@@ -19,6 +19,12 @@ public class Tools {
         System.out.println("fin.\n\n");
     
     }
+    public static void printCard(ItemCard card){
+        System.out.println(" --- ITEM CARD ---");
+        System.out.println(" Name: "+card.name);
+        System.out.println(" Tier: "+card.tier);
+        System.out.println(" Builds at: "+ card.buildsAt);
+    }
     public static ArrayList<String> ReadFile(String filename) {
         ArrayList<String> fileContents = new ArrayList<String>();
         try
@@ -27,7 +33,6 @@ public class Tools {
             BufferedReader in = new BufferedReader(new FileReader(filename));
 
             String strLine;
-            int count = 0;
             while((strLine = in.readLine())!= null)
             {
                 // remove comments and empty lines from input
@@ -47,14 +52,22 @@ public class Tools {
         String[] tokens = str.split(" ");
         return tokens;
     }
+    public static String mergeStrings(String[] array){
+        return mergeStrings(array, ",");
+    }
     public static String mergeStrings(String[] strarray, String separator){
         String output = "";
         for (int i = 0;i<strarray.length;i++)
         {
             if(i==strarray.length-1)
-                output = output+strarray[i];
+                try{
+                    output = output+Integer.parseInt(strarray[i]);
+                } catch(NumberFormatException e){output = output+"'"+strarray[i]+"'";}
+                    
             else
-                output = output+strarray[i]+separator;                
+                try{
+                    output = output+Integer.parseInt(strarray[i])+separator;
+                } catch(NumberFormatException e){output = output+"'"+strarray[i]+"'"+separator;}              
         }
         return output;
     }

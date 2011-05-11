@@ -32,7 +32,6 @@ public class Tools {
             BufferedReader in = new BufferedReader(new FileReader(filename));
 
             String strLine;
-            int count = 0;
             while((strLine = in.readLine())!= null)
             {
                 // remove comments and empty lines from input
