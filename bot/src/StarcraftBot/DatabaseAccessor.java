@@ -2,16 +2,57 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package databasetester;
+package StarcraftBot;
 import SQLite.*;
 import java.io.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
  * @author jakob
  */
-public class DatabaseTester implements SQLite.Trace, SQLite.Profile {
+public class DatabaseAccessor implements SQLite.Trace, SQLite.Profile {
 
+    // member fields:
+    String dbFile = "corpus/database";
+    String tableName = "test"; //"Corpus";
+    String cardColumn = "unitData";
+    SQLite.Database db = new SQLite.Database();
+    String[] schema = new String[] {"id integer primary key", cardColumn+" blob"};
+    
+    int lineCount;
+    
+    // constr
+    public DatabaseAccessor(){
+        this.db = new SQLite.Database();
+        try {
+            db.open(dbFile, 0666); // what is the number?
+            setupDatabase();
+            do_select(db, "select Count(*) from "+tableName);
+            
+        } catch (SQLite.Exception ex) {
+            // auto generated exception handling.
+            System.err.println("Couldn't create Database Accessor!");
+            Logger.getLogger(DatabaseAccessor.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+        
+    }
+    private void setupDatabase(){
+        try{
+                
+            do_exec(db, "create table "+tableName+"("+
+                    Tools.mergeStrings(schema, ",") +")"); // key is not the "TYPE" the 'id' is set to be the "primary key" though
+	    
+            }
+            catch(SQLite.Exception ee){
+                System.out.println(ee.getMessage());
+                // couldn't create table
+            }
+    }
+            
+    
     public void trace(String stmt) {
 	System.out.println("TRACE: " + stmt);
     }
@@ -89,14 +130,43 @@ public class DatabaseTester implements SQLite.Trace, SQLite.Profile {
 	stmt.close();
     }
 
-    public static void main(String args[]) {
+    // High level methods for Starcraft Implementation:
+    public void writeln(ItemCard card, String string_id){
+        try{
+        byte[] sCard = Tools.Serialise(card);
+        // DEBUG: Always writing to row ==1 for now!!
+        this.lineCount=0;
+	do_exec(db, "insert into "+tableName+" values(NULL, zeroblob(128))");
+        do_exec(db, "insert into "+tableName+" values(NULL, zeroblob(128))");
+        
+        Blob writer = db.open_blob("main", tableName, cardColumn, lineCount, true); // what's the number?
+            
+        OutputStream os = writer.getOutputStream();
+        os.write(sCard);
+        os.close();
+        writer.close();
+        }
+        catch(java.lang.Exception e){
+            System.err.println("Couldn't write card to database.");
+            System.err.println(e.getMessage());
+            e.printStackTrace();
+        }
+        
+    }
+    public Object read(String id){
+        // do nothing
+        return null;
+    }
+    
+    
+    public static void test(String dbfile) {
 	boolean error = true;
-        DatabaseTester T = new DatabaseTester();
+        DatabaseAccessor T = new DatabaseAccessor();
 	System.out.println("LIB version: " + SQLite.Database.version());
 	SQLite.Database db = new SQLite.Database();
 	try {
 	    byte[] b;
-	    db.open("test", 0666);
+	    db.open(dbfile, 0666);
 	    System.out.println("DB version: " + db.dbversion());
 	    db.busy_timeout(1000);
 	    db.busy_handler(null);
@@ -193,7 +263,7 @@ public class DatabaseTester implements SQLite.Trace, SQLite.Profile {
             // serialise it:
             byte[] serialisedCls = Tools.Serialise(cls);
             
-            Blob writer = db.open_blob("main", "B", "val", 2, true); // what's the number?
+            Blob writer = db.open_blob("main", "B", "val", 2, true); // what's the number line!?
             
 	    os = writer.getOutputStream();
 	    os.write(serialisedCls);

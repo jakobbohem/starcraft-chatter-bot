@@ -168,8 +168,10 @@ public class test3 implements SQLite.Trace, SQLite.Profile {
 		b = null;
 		System.out.println("INFO: backup end");
 	    } catch (java.lang.Exception ee) {
-		System.err.println("error: " + ee);
+		System.err.println("error when attempting backup: " + ee);
 	    }
+            
+            // printing info about the current use of database
 	    int info[] = new int[2];
 	    SQLite.Database.status(SQLite.Constants.SQLITE_STATUS_MEMORY_USED, info, false);
 	    System.out.println("INFO: status(STATUS_MEMORY_USED) = "

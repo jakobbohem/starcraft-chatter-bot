@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package StarcraftBot;
+package databasetester;
 
 import java.util.ArrayList;
 import java.io.*;
@@ -11,6 +11,11 @@ import java.io.*;
  * @author jakob
  */
 public class Tools {
+ 
+    // if the transient keyword is omitted, the code in main will throw
+    // a NotSerializableException.
+    transient InputStream is = System.in;
+    
     public static void printArray(String[] ar)
     {
         for (int i = 0; i<ar.length; i++) {
@@ -47,17 +52,7 @@ public class Tools {
         String[] tokens = str.split(" ");
         return tokens;
     }
-    public static String mergeStrings(String[] strarray, String separator){
-        String output = "";
-        for (int i = 0;i<strarray.length;i++)
-        {
-            if(i==strarray.length-1)
-                output = output+strarray[i];
-            else
-                output = output+strarray[i]+separator;                
-        }
-        return output;
-    }
+    
     
     // Object serialiser for save to database
     public static byte[] Serialise(Object obj) throws IOException {
