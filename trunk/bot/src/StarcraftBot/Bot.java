@@ -15,9 +15,19 @@ public class Bot {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        // TODO code application logic here
         
-        int exitcode = 0;
+        
+        
+        //  Test saving an object to database
+        DatabaseAccessor dba = new DatabaseAccessor();
+        ItemCard marineCard = new ItemCard("marine");
+        dba.writeln(marineCard, "some id string (to search for?)");
+        
+        Object fromDB = dba.read("marine");
+        ItemCard newItem = (ItemCard)fromDB;
+        
+        // Run program
+        int exitcode = 1;
         Scanner scan = new Scanner(System.in);
         
         while(exitcode != 1)
@@ -57,7 +67,7 @@ public class Bot {
             
             }
             // now get the labels and print them!
-        }
+        } // end of while
         
     }
 }
