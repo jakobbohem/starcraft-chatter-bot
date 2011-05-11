@@ -7,6 +7,7 @@ import SQLite.*;
 import java.io.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.*;
 
 /**
  *
@@ -16,11 +17,11 @@ public class DatabaseAccessor implements SQLite.Trace, SQLite.Profile {
 
     // member fields:
     String dbFile = "corpus/database";
-    String tableName = "test"; //"Corpus";
+    String tableName = "test2"; //"Corpus";
     String cardColumn = "unitData";
     SQLite.Database db = new SQLite.Database();
-    String[] schema = new String[] {"id integer primary key", "name text","type text", cardColumn+" blob"};
-    String blobCols = "id, name, type, "+ cardColumn;
+    String[] schema = new String[] {"id integer primary key", "unit text","action text", cardColumn+" blob"};
+    String blobCols = Tools.parseColumns(schema);//"id, name, type, "+ cardColumn;
     
     int lineCount;
     int blobSize;
@@ -59,38 +60,32 @@ public class DatabaseAccessor implements SQLite.Trace, SQLite.Profile {
     }
     
     // methods:
+    public void delete(int id){
+        try {
+            // delete the id
+            String query = "delete from "+tableName+" where id="+id;
+            do_exec(db, query);
+        } catch (SQLite.Exception ex) {
+            System.err.printf("Couldn't delete from database row with id: %d\n",id);
+            Logger.getLogger(DatabaseAccessor.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
     public void write(ItemCard card, String[] identifiers){
+        // handle the search identifiers
         write(card);
     }
-    public void write(ItemCard card){
+    public int write(ItemCard card){
         try{
             
-            // DEBUG: Always writing to row ==1 for now!!
-            int tries = 0;
-            this.lineCount = 1;
+            // ID is currently set to 1 more than # of rows.
+            this.lineCount = do_get_rows()+1;
             String id = Integer.toString(lineCount); // what should this be?
+            
+            
             // Add row with empty blob (no row number ... )
             String[] vals = new String[] {id, card.name, card.type};
-            while(tries<trycount)
-            try{
-                do_exec(db, "insert into "+tableName+"("+blobCols+") values("+Tools.mergeStrings(vals)+", zeroblob("+blobSize+"))");
-            } catch(SQLite.Exception ee){
-                // couldn't write to database - retry
-                tries++;
-            }
-            
-            
-            // Insert other data (i.e. name, type etc.)
-            // currently the schema is id, name, type, card-object
-//            Stmt stmt = prep_ins(db, "insert into "+tableName+"("+Tools.mergeStrings(blobCols, ",") +")" +
-//                    " VALUES("+Tools.mergeStrings(inputs,",")+")");
-                    //" VALUES(:one, :two, :three, :four)"); // this isn't quite used atm.
-				  
-//            stmt.bind(1, id);
-//            stmt.bind(2, card.name);
-//            stmt.bind(3, card.type);
-//            stmt.bind(4, new byte[blobSize]);
-//            do_ins(stmt);
+            do_exec(db, "insert into "+tableName+"("+blobCols+") values("+Tools.mergeStrings2(vals)+", zeroblob("+blobSize+"))");
+
             
             // get blob output stream 
             Blob writer = db.open_blob("main", tableName, cardColumn, lineCount, true);
@@ -100,13 +95,39 @@ public class DatabaseAccessor implements SQLite.Trace, SQLite.Profile {
             writeStream.write(sCard);
             writeStream.close();
             writer.close();
+            
         }
         catch(java.lang.Exception e){
             System.err.println("Couldn't write card to database.");
             System.err.println(e.getMessage());
             e.printStackTrace();
         }
+        return lineCount;
         
+    }
+    public void printDB(){
+        try {
+            Stmt stmt = db.prepare("select * from "+tableName);
+            ArrayList<String[]> list = new ArrayList<String[]>();
+            int ncol = stmt.column_count();
+            int nrow = 0;
+            
+            while (stmt.step())
+            {
+                String[] row = new String[ncol];
+                for (int i =0;i<ncol;i++)
+                    row[i] = stmt.column_string(i);
+                System.out.println(" -"+nrow+" "+Tools.mergeStrings2(row));
+                list.add(row);
+                nrow++;
+            }
+            stmt.close();
+            list.toArray(new String[list.size()][]);
+            //return list;
+            
+        } catch (SQLite.Exception ex) {
+            Logger.getLogger(DatabaseAccessor.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
     public Object read(int lineNo){
         // just read some line.
@@ -131,12 +152,80 @@ public class DatabaseAccessor implements SQLite.Trace, SQLite.Profile {
             return null;
         }
     }
-    public Object read(String searchId){
-        int lineNo = 1;// get from searchId
-        return read(lineNo);
+    public Object readAction(String searchId){
+        String query = "select id from "+tableName+" where action='"+searchId+"'";
         
+        int lineNo = 0; // default
+        try {
+            lineNo = getInt(query); // get from searchId
+        } catch (SQLite.Exception ex) {
+            Logger.getLogger(DatabaseAccessor.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return read(lineNo);        
+    }
+    public Object read(String searchId){
+        String query = "select id from "+tableName+" where unit='"+searchId+"'";
+        
+        int lineNo = 0; // default
+        try {
+            lineNo = getInt(query); // get from searchId
+        } catch (SQLite.Exception ex) {
+            Logger.getLogger(DatabaseAccessor.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return read(lineNo);        
+    }
+    private String[] getRows(String query) throws SQLite.Exception {
+        
+        Stmt statement = prep_ins(db, query);
+        ArrayList<String> list = new ArrayList<String>();
+        int ncol = statement.column_count();
+                
+        while(statement.step())
+        {
+            String[] row = new String[ncol];
+            for (int i =0;i<ncol;i++)
+                row[i] = statement.column_string(i);
+            String stringrow = Tools.mergeStrings2(row, "|");
+            list.add(stringrow);
+        }
+        statement.close();
+        return list.toArray(new String[list.size()]);
         
     }
+    // Returns a string represenataion of the query posted.
+    // for example a single column name. In the case of too much data, the first
+    // element will be returned;
+    private String getString(String query) throws SQLite.Exception {
+        Stmt statement = prep_ins(db, query);
+        String delim = " | ";
+        while(statement.step())
+        {
+            if("text".equals(statement.column_decltype(0)))
+            {
+                String rets = "";
+                for (int i = 0;i<statement.column_count();i++)
+                    rets = rets+delim+statement.column_string(i);
+                return rets;
+            }
+        }
+        throw new SQLite.Exception("couldn't parse string type");
+    }
+    private int getInt(String query) throws SQLite.Exception {
+        
+        Stmt stmt = prep_ins(db, query);
+        int outp = 0;
+            try{
+                stmt.step();
+                for (int i = 0;i<stmt.column_count();i++)
+                    outp = Integer.parseInt(stmt.column_string(i));
+            } catch(NumberFormatException ee){
+                System.err.println("Couldn't parse Integer");
+                // couldn't parse this int...
+            }
+        
+        return outp; // should return parsed number of rows!
+    }
+    
     public void flushDB(){
         try {
             System.out.println("Are you sure, you want to flush database (answer true / false)");
@@ -160,9 +249,10 @@ public class DatabaseAccessor implements SQLite.Trace, SQLite.Profile {
     // --- TEST METHODS FROM EXAMPLE FILE(S) --- 
     public static void test2(DatabaseAccessor dba){
         //  Test saving an object to database
-        //dba.db.trace(dba);
+        dba.db.trace(dba);
         ItemCard marineCard = new ItemCard("marine");
-        dba.write(marineCard); // String[] of idents currently not variable...
+        int rownumber = dba.write(marineCard); // String[] of idents currently not variable...
+        dba.delete(rownumber);
         
         Object fromDB = dba.read("marine");
         ItemCard newItem = (ItemCard)fromDB;
@@ -336,26 +426,38 @@ public class DatabaseAccessor implements SQLite.Trace, SQLite.Profile {
 	    System.exit(1);
 	}
     }
+    
+    private int do_get_rows() throws SQLite.Exception {
+        String statement = "select Count(*) from "+tableName;
+        Stmt stmt = prep_ins(db, statement);
+        int outp = 0;
+            try{
+                stmt.step();
+                for (int i = 0;i<stmt.column_count();i++)
+                    outp = Integer.parseInt(stmt.column_string(i));
+            } catch(NumberFormatException ee){
+                System.err.println("Coudln't get number of rows");
+                // couldn't parse this int...
+            }
+        
+        return outp; // should return parsed number of rows!
+    }
     // test file implementation methods:
     public void trace(String stmt) {
 	System.out.println("TRACE: " + stmt);
     }
-
     public void profile(String stmt, long est) {
 	System.out.println("PROFILE(" + est + "): " + stmt);
     }
-
     SQLite.Stmt prep_ins(SQLite.Database db, String sql)
 	throws SQLite.Exception {
 	return db.prepare(sql);
     }
-
     void do_ins(SQLite.Stmt stmt) throws SQLite.Exception {
 	stmt.reset();
 	while (stmt.step()) {
 	}
     }
-
     void do_ins(SQLite.Stmt stmt, int i, double d, String t, byte[] b)
         throws SQLite.Exception {
 	stmt.reset();
@@ -366,14 +468,12 @@ public class DatabaseAccessor implements SQLite.Trace, SQLite.Profile {
 	while (stmt.step()) {
 	}
     }
-
     void do_exec(SQLite.Database db, String sql) throws SQLite.Exception {
 	SQLite.Stmt stmt = db.prepare(sql);
 	while (stmt.step()) {
 	}
 	stmt.close();
     }
-
     void do_select(SQLite.Database db, String sql) throws SQLite.Exception {
 	SQLite.Stmt stmt = db.prepare(sql);
 	int row = 0;
