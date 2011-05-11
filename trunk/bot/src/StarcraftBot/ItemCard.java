@@ -16,8 +16,8 @@ public class ItemCard implements Serializable {
     String type;
     String name;
     String[] techtree;
-    Addon[] abilities;
-    Addon[] upgrades;
+//    Addon[] abilities;
+//    Addon[] upgrades;
     String buildsAt;
     String[] counter;
     String[] strongAgainst;
@@ -58,10 +58,10 @@ public class ItemCard implements Serializable {
                     health=40;
 
                     // create the addons:
-                    abilities = new Addon[1];
-                    upgrades = new Addon[1];
-                    abilities[0] = new Addon("stim pack", name, "Academy");
-                    upgrades[0] = new Addon("U-238 shells", name, "Academy");
+                    //abilities = new Addon[1];
+                    //upgrades = new Addon[1];
+                    //abilities[0] = new Addon("stim pack", name, "Academy");
+                    //upgrades[0] = new Addon("U-238 shells", name, "Academy");
 
                 }
                 else throw new Exception("couldn't find match for unit type '"+unitType+"'. try again.");
@@ -72,7 +72,7 @@ public class ItemCard implements Serializable {
     
     }
     // methods
-    class Addon{
+    class Addon implements Serializable {
         // class for the add-ons for each unit with additional requirements
         
         String name;
