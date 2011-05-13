@@ -14,23 +14,24 @@ import java.util.*;
  */
 public class ItemCard implements Serializable {
     // member fields:
-    String type;
-    String name;
-    String[] techtree; // a string[] representation of the tech tree.
-    ArrayList<String> TechTree;
+    public String type;
+    public String name;
+    public String[] techTree;
+    public ArrayList<String> techTreeList
+
 //    Addon[] abilities;
 //    Addon[] upgrades;
-    String buildsAt;
-    String[] counter;
-    String[] strongAgainst;
-    int buildTime;
-    int health;
-    int armour;
-    int food;
-    int mineralCost;
-    int gasCost;
+    public String buildsAt;
+    public String[] counter;
+    public String[] strongAgainst;
+    public int buildTime;
+    public int health;
+    public int armour;
+    public int food;
+    public int mineralCost;
+    public int gasCost;
     
-    int tier;
+    public int tier;
     
     // not necessarily there (in user query..)
     String nUnits;
@@ -50,8 +51,8 @@ public class ItemCard implements Serializable {
                     
                     techtree=new String[]{"Command Centre","Barracks"};
                     TechTree = new ArrayList<String>();
-                    for (int i = 0;i<techtree.length;i++)
-                        TechTree.add(techtree[i]);
+                    for (int i = 0;i<techTree.length;i++)
+                        techTreeList.add(techTree[i]);
                     
                     counter=new String[] {"vulture"};
                     buildsAt="Barracks";
