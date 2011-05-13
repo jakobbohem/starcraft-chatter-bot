@@ -17,15 +17,15 @@ public class Bot {
     public static void main(String[] args) {
         
         // Run basic database implementation test:
-        DatabaseAccessor dba = new DatabaseAccessor();
-        DatabaseAccessor.test2(dba);
-                
-        // Test just READING from database:
-        ItemCard unit = (ItemCard)dba.read(1);
-        Tools.printCard(unit);
+//        DatabaseAccessor dba = new DatabaseAccessor();
+//        DatabaseAccessor.test2(dba);
+//                
+//        // Test just READING from database:
+//        ItemCard unit = (ItemCard)dba.read(1);
+//        Tools.printCard(unit);
         
         // Run program
-        int exitcode = 1;
+        int exitcode = 0;
         Scanner scan = new Scanner(System.in);
         
         while(exitcode != 1)

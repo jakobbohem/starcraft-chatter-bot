@@ -6,6 +6,7 @@ package StarcraftBot;
 import java.io.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.*;
         
 /**
  *
@@ -15,7 +16,8 @@ public class ItemCard implements Serializable {
     // member fields:
     String type;
     String name;
-    String[] techtree;
+    String[] techtree; // a string[] representation of the tech tree.
+    ArrayList<String> TechTree;
 //    Addon[] abilities;
 //    Addon[] upgrades;
     String buildsAt;
@@ -45,7 +47,12 @@ public class ItemCard implements Serializable {
                     type="light";
                     tier=1;
                     this.name=name;
+                    
                     techtree=new String[]{"Command Centre","Barracks"};
+                    TechTree = new ArrayList<String>();
+                    for (int i = 0;i<techtree.length;i++)
+                        TechTree.add(techtree[i]);
+                    
                     counter=new String[] {"vulture"};
                     buildsAt="Barracks";
                     strongAgainst=new String[] {"light"};

@@ -17,10 +17,21 @@ public class DatabaseAccessor implements SQLite.Trace, SQLite.Profile {
 
     // member fields:
     String dbFile = "corpus/database";
-    String tableName = "test2"; //"Corpus";
+    String unitsTable = "units"; //"Corpus";
+    String qTable = "questions";
+    String rTable = "replies";
+    
+    String cards = "cards";
     String cardColumn = "unitData";
-    SQLite.Database db = new SQLite.Database();
-    String[] schema = new String[] {"id integer primary key", "unit text","action text", cardColumn+" blob"};
+    SQLite.Database db = new SQLite.Database(); // integer primary key becomes 'alias' for rowid.
+    
+    // schemas
+    String[] querySchema = new String[] {"id integer primary key", "question text", "action text","actor integer", "object text", "queryId integer"};
+    String[] responseSchema = new String[] {"id integer primary key", "queryId integer", "cPhrase text"};
+    String[] schema = new String[] {"id integer primary key", "name text", cardColumn+" blob"}; // for the unit cards with info
+    String[] learningSchema = new String[] {"id integer primary key", "newNouns text"};
+    
+    // insert finder strins:
     String blobCols = Tools.parseColumns(schema);//"id, name, type, "+ cardColumn;
     
     int lineCount;
@@ -34,9 +45,12 @@ public class DatabaseAccessor implements SQLite.Trace, SQLite.Profile {
         try {
             blobSize = (int)Math.pow(2,11); // in 2-power size; 2^11 = 2048
             db.open(dbFile, 0666); // what is the number?
-            createTable(tableName, this.schema);
+            createTable(unitsTable, this.schema);
+            createTable(unitsTable, this.schema);
+            createTable(unitsTable, this.schema);
+            
             trycount=5; // init the try count
-            do_select(db, "select Count(*) from "+tableName);
+            do_select(db, "select Count(*) from "+unitsTable);
             
         } catch (SQLite.Exception ex) {
             // auto generated exception handling.
@@ -48,9 +62,8 @@ public class DatabaseAccessor implements SQLite.Trace, SQLite.Profile {
     }
     private void createTable(String tablename, String[] schema){
         try{
-                
-            do_exec(db, "create table "+tablename+"("+
-                    Tools.mergeStrings(schema, ",") +")");
+            // create the three tables (unit data, query table, response table)
+            do_exec(db, "create table "+tablename+"("+Tools.mergeStrings(schema, ",") +")");
             // key is not the "TYPE" the 'id' is set to be the "primary key" though
 	    
             }
@@ -63,7 +76,7 @@ public class DatabaseAccessor implements SQLite.Trace, SQLite.Profile {
     public void delete(int id){
         try {
             // delete the id
-            String query = "delete from "+tableName+" where id="+id;
+            String query = "delete from "+unitsTable+" where id="+id;
             do_exec(db, query);
         } catch (SQLite.Exception ex) {
             System.err.printf("Couldn't delete from database row with id: %d\n",id);
@@ -84,11 +97,11 @@ public class DatabaseAccessor implements SQLite.Trace, SQLite.Profile {
             
             // Add row with empty blob (no row number ... )
             String[] vals = new String[] {id, card.name, card.type};
-            do_exec(db, "insert into "+tableName+"("+blobCols+") values("+Tools.mergeStrings2(vals)+", zeroblob("+blobSize+"))");
+            do_exec(db, "insert into "+unitsTable+"("+blobCols+") values("+Tools.mergeStrings2(vals)+", zeroblob("+blobSize+"))");
 
             
             // get blob output stream 
-            Blob writer = db.open_blob("main", tableName, cardColumn, lineCount, true);
+            Blob writer = db.open_blob("main", unitsTable, cardColumn, lineCount, true);
 
             OutputStream writeStream = writer.getOutputStream();
             byte[] sCard = Tools.Serialise(card);
@@ -105,9 +118,9 @@ public class DatabaseAccessor implements SQLite.Trace, SQLite.Profile {
         return lineCount;
         
     }
-    public void printDB(){
+    public void printDB(String tablename){
         try {
-            Stmt stmt = db.prepare("select * from "+tableName);
+            Stmt stmt = db.prepare("select * from "+tablename);
             ArrayList<String[]> list = new ArrayList<String[]>();
             int ncol = stmt.column_count();
             int nrow = 0;
@@ -129,42 +142,38 @@ public class DatabaseAccessor implements SQLite.Trace, SQLite.Profile {
             Logger.getLogger(DatabaseAccessor.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-    public Object read(int lineNo){
+    public ItemCard read(int lineNo){
         // just read some line.
         try {
             
-            Blob inputBlob = db.open_blob("main", tableName, cardColumn, lineNo, true);
+            Blob inputBlob = db.open_blob("main", unitsTable, cardColumn, lineNo, true);
             InputStream reader = inputBlob.getInputStream();
             byte[] byteFlow = new byte[blobSize];
             reader.read(byteFlow);
             reader.close();
             inputBlob.close();
-
-            // deserialise it!!
-                        //throws SQLException, IOException, ClassNotFoundException {
-            //ResultSet rs =  st.executeQuery("SELECT * FROM SerialTest");
             
             Object returnObject = Tools.DeSerialise(byteFlow);
-            return returnObject;
+            return (ItemCard)returnObject;
         } catch (java.lang.Exception ex) {
             System.err.println("Couldn't read blob from database");
             Logger.getLogger(DatabaseAccessor.class.getName()).log(Level.SEVERE, null, ex);
             return null;
         }
     }
-    public Object readAction(String searchId){
-        String query = "select id from "+tableName+" where action='"+searchId+"'";
+    public ItemCard getCard(String name){
+        String query = "select id from "+unitsTable+" where action='"+name+"'";
         
         int lineNo = 0; // default
         try {
-            lineNo = getInt(query); // get from searchId
+            lineNo = getInt(query); // get return integer from Query ('Count(*)')
         } catch (SQLite.Exception ex) {
             Logger.getLogger(DatabaseAccessor.class.getName()).log(Level.SEVERE, null, ex);
         }
         return read(lineNo);        
     }
     public Object read(String searchId){
-        String query = "select id from "+tableName+" where unit='"+searchId+"'";
+        String query = "select id from "+unitsTable+" where unit='"+searchId+"'";
         
         int lineNo = 0; // default
         try {
@@ -174,6 +183,34 @@ public class DatabaseAccessor implements SQLite.Trace, SQLite.Profile {
         }
         return read(lineNo);        
     }
+    public int[] findRows(String... searchIds) throws SQLite.Exception {
+        String query = "select id from "+unitsTable;
+        for(int i=0;i<searchIds.length;i++)
+        {
+            String[] s = searchIds[i].split(" ");
+            query = query+" where "+s[0]+"='"+s[1]+"'";
+            
+        }
+        Stmt stmt = prep_ins(db, query);
+        
+        ArrayList<Integer> hits = new ArrayList<Integer>();
+        while(stmt.step()){
+            // assuming only 1 col
+            hits.add(stmt.column_int(0));
+            
+        } // end of while
+        int[] ret = new int[hits.size()];
+        for (int i =0;i<hits.size();i++){
+            ret[i] = hits.get(i);
+        }
+        return ret;
+    }
+    public int[] findRows(String action, String actor){
+        // find the rows which match action and actor
+        return findRows(String.format("action %s", action), String.format("actor %s", actor));
+    }
+    // ItemCard marene = getItem("Marine");
+    // marine.name; marine.techtree;
     private String[] getRows(String query) throws SQLite.Exception {
         
         Stmt statement = prep_ins(db, query);
@@ -229,15 +266,15 @@ public class DatabaseAccessor implements SQLite.Trace, SQLite.Profile {
     public void flushDB(){
         try {
             System.out.println("Are you sure, you want to flush database (answer true / false)");
-            System.out.println("A backup will be made to: '"+tableName+"_bkp'.");
+            System.out.println("A backup will be made to: '"+unitsTable+"_bkp'.");
             BufferedReader r = new BufferedReader(new InputStreamReader(System.in));
             boolean accept = Boolean.parseBoolean(r.readLine());
             if(accept)
             {
-                do_exec(db, "drop table "+tableName+"_bkp");
-                createTable(tableName+"_bkp", this.schema);
-                do_exec(db, "insert into "+tableName+"_bkp select * from "+tableName);
-                do_exec(db, "drop table "+tableName);
+                do_exec(db, "drop table "+unitsTable+"_bkp");
+                createTable(unitsTable+"_bkp", this.schema);
+                do_exec(db, "insert into "+unitsTable+"_bkp select * from "+unitsTable);
+                do_exec(db, "drop table "+unitsTable);
             }
             else return;
         } catch (java.lang.Exception ex) {
@@ -428,7 +465,7 @@ public class DatabaseAccessor implements SQLite.Trace, SQLite.Profile {
     }
     
     private int do_get_rows() throws SQLite.Exception {
-        String statement = "select Count(*) from "+tableName;
+        String statement = "select Count(*) from "+unitsTable;
         Stmt stmt = prep_ins(db, statement);
         int outp = 0;
             try{

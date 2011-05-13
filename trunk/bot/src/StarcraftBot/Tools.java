@@ -27,6 +27,19 @@ public class Tools {
         System.out.println(" Tier: "+card.tier);
         System.out.println(" Builds at: "+ card.buildsAt);
     }
+    /** method returns the columns to insert into for use in SQL queries,
+     * stripping the keywords used in the schema for table creation.
+     * Another way of doing the same thing might be to pass a "Schema" command
+     * to sqlite through the {@link SQLite.Database}.
+     * 
+     * @param schema is the schema on the form {"name1 integer", "name2 text" } 
+     * etc. to parse.
+     * 
+     * @return a string that can be used in a query, i.e. 
+     *  String q = "insert into tableName("+parseColumns(schema)+" values('234', 'string value')";
+     * 
+     * @
+     */
     public static String parseColumns(String[] schema){
         String[] columns = new String[schema.length];
         
