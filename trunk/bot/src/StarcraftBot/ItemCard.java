@@ -17,7 +17,7 @@ public class ItemCard implements Serializable {
     public String type;
     public String name;
     public String[] techTree;
-    public ArrayList<String> techTreeList
+    public ArrayList<String> techTreeList;
 
 //    Addon[] abilities;
 //    Addon[] upgrades;
@@ -49,8 +49,8 @@ public class ItemCard implements Serializable {
                     tier=1;
                     this.name=name;
                     
-                    techtree=new String[]{"Command Centre","Barracks"};
-                    TechTree = new ArrayList<String>();
+                    techTree=new String[]{"Command Centre","Barracks"};
+                    techTreeList = new ArrayList<String>();
                     for (int i = 0;i<techTree.length;i++)
                         techTreeList.add(techTree[i]);
                     
