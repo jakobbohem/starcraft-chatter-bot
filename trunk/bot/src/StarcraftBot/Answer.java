@@ -1,9 +1,22 @@
-package starcraftBot;
+package StarcraftBot;
 
 import java.util.*;
 
 public abstract class Answer {
-	public Answer(String action, ItemCard actor){}
-	public Answer(String action, ItemCard actor, List<ItemCard> itemCards){}
+	protected String action;
+	protected ItemCard actor;
+	protected List<ItemCard> itemCards;
+
+	public Answer(String action, ItemCard actor){
+		this.action = action;
+		this.actor = actor;
+	}
+	
+	public Answer(String action, ItemCard actor, List<ItemCard> itemCards){
+		this.action = action;
+		this.actor = actor;
+		this.itemCards = itemCards;
+	}	
+	
 	public abstract String buildAnswer() throws ItemCardException;
 }
