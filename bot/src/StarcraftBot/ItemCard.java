@@ -15,12 +15,13 @@ import java.util.*;
 public class ItemCard implements Serializable {
     // member fields:
     public String type;
+
+    public String builtBy;
+
+    public String size;
     public String name;
     public String[] techTree;
     public ArrayList<String> techTreeList;
-
-//    Addon[] abilities;
-//    Addon[] upgrades;
     public String buildsAt;
     public String[] counter;
     public String[] strongAgainst;
@@ -45,7 +46,8 @@ public class ItemCard implements Serializable {
                 if("marine".equals(unitType.toLowerCase()))
                 {
                     String name = "marine";
-                    type="light";
+                    type="unit";
+                    size = "light";
                     tier=1;
                     this.name=name;
                     
@@ -79,7 +81,69 @@ public class ItemCard implements Serializable {
         
     
     }
-    // methods
+    public void update(String... arguments) throws CardException {
+        for (int i = 0;i<arguments.length;i++){
+            // note switching 'string' arguments is coming first in JDK 7
+            String[] keyval = arguments[i].split(" ");
+            String key = keyval[0];
+            String value = keyval[1];
+
+            // going through the fields of ItemCard
+            if(key.toLowerCase().equals("name"))
+                this.name = value;
+            else if(key.toLowerCase().equals("size"))
+                this.size = value;
+            else if(key.toLowerCase().equals("tier"))
+                this.tier = Integer.parseInt(value);
+            else if(key.toLowerCase().equals("techtree")){
+                String[] array = new String[counter.length+1];
+                array[array.length] = value;
+                counter = array;
+                // is this a better approach in general?
+                techTreeList.add(value);
+            }
+            else if(key.toLowerCase().equals("counter")){
+                String[] array = new String[counter.length+1];
+                array[array.length] = value;
+                counter = array;
+            }
+            else if(key.toLowerCase().equals("buildsat"))
+                this.buildsAt = value;
+            else if(key.toLowerCase().equals("strongagainst")) {
+                String[] array = new String[strongAgainst.length+1];
+                array[array.length] = value;
+                strongAgainst = array;
+            }
+            else if(key.toLowerCase().equals("buildtime"))
+                this.buildTime = Integer.parseInt(value);
+            else if(key.toLowerCase().equals("mineralcost"))
+                this.mineralCost = Integer.parseInt(value);
+            else if(key.toLowerCase().equals("gascost"))
+                this.gasCost = Integer.parseInt(value);
+            else if(key.toLowerCase().equals("food"))
+                this.food = Integer.parseInt(value);
+            else if(key.toLowerCase().equals("armour") || key.toLowerCase().equals("armor"))
+                this.armour = Integer.parseInt(value);
+            else if(key.toLowerCase().equals("health"))
+                this.health = Integer.parseInt(value);
+            else if(key.toLowerCase().equals("builtBy")) {
+                if(type =="building")
+                    this.builtBy = value;
+                else
+                    throw new CardException("builtBy only applies to building.");
+            }
+            else throw new CardException("Couldn't interpret input string: "+arguments[i]);
+                     
+                        
+        }
+    }
+
+    class CardException extends java.lang.Exception{
+        CardException(String message){
+            super(message);
+        }
+    }
+
     class Addon implements Serializable {
         // class for the add-ons for each unit with additional requirements
         
