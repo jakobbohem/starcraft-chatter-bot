@@ -84,9 +84,12 @@ public class ItemCard implements Serializable {
     public void update(String... arguments) throws CardException {
         for (int i = 0;i<arguments.length;i++){
             // note switching 'string' arguments is coming first in JDK 7
-            String[] keyval = arguments[i].split(" ");
-            String key = keyval[0];
-            String value = keyval[1];
+            String[] keyval = arguments[i].split(":");
+            if(keyval.length!=2)
+                throw new IllegalArgumentException("The update statement must be an existing fiels"
+                        + " followed by the new value, separated by colon (:)");
+            String key = keyval[0].trim();
+            String value = keyval[1].trim();
 
             // going through the fields of ItemCard
             if(key.toLowerCase().equals("name"))
