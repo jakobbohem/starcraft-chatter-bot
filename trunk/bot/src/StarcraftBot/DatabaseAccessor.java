@@ -96,23 +96,30 @@ public class DatabaseAccessor implements SQLite.Trace, SQLite.Profile {
             Logger.getLogger(DatabaseAccessor.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-    public int update(String cardName, String... fields){
+    public int updateItemCard(String cardName, String... fields) throws DatabaseException, IllegalArgumentException, IOException {
         int row=0;
-        try {
-            int[] matches = getRowNumbers(String.format("select * from %s where name='%s'",unitsTable, cardName));
-            if (matches.length==0)
-                throw new DatabaseException("Found no match for '"+cardName+"' in database.");
+        try{
+        int[] matches = getRowNumbers("name:marine");//String.format("select * from %s where name='%s'",unitsTable, cardName.toLowerCase()));
+        if (matches.length==0)
+            throw new DatabaseException("Found no match for '"+cardName+"' in database.");
 
-            if (matches.length > 1)
-                System.err.println("WARNING. found more than 1 match. Using 1st occurrence");
+        if (matches.length > 1)
+            System.err.println("WARNING. found more than 1 match. Using 1st occurrence");
 
-            row = matches[0];
-            ItemCard dbCard = getCard(cardName);
+        row = matches[0];
+        ItemCard dbCard = getItemCard(cardName);
 
-            dbCard.update(fields);
+        dbCard.update(fields);
 
-        } catch (java.lang.Exception ex) {
-            Logger.getLogger(DatabaseAccessor.class.getName()).log(Level.SEVERE, null, ex);
+        // write back to database:
+        overwrite(dbCard, row);
+        }
+        catch(SQLite.Exception e){
+            System.err.println("Error when writing to database");
+            System.err.println(e.getMessage());
+        } catch(ItemCard.CardException e){
+            System.err.println("Error when writing to database");
+            System.err.println(e.getMessage());
         }
         return row;
     }
@@ -121,9 +128,21 @@ public class DatabaseAccessor implements SQLite.Trace, SQLite.Profile {
      * @param card
      * @return the row number/ unique id of the new entry
      */
-    public int write(ItemCard card){
+    public void overwrite(ItemCard card, int row) throws DatabaseException, IOException, SQLite.Exception {
+            
+            // get blob output stream
+            Blob writer = db.open_blob("main", unitsTable, cardColumn, row, true);
+
+            OutputStream writeStream = writer.getOutputStream();
+            byte[] sCard = Tools.Serialise(card);
+            writeStream.write(sCard);
+            writeStream.close();
+            writer.close();
+
+    }
+    public int write(ItemCard card) throws DatabaseException,IOException {
         try{
-            if (getRows(card.name).length!=0)
+            if (getRowNumbers("name: "+card.name).length != 0)
                 throw new DatabaseException("Card Already Exists in database. Use update() instead.");
 
             // ID is currently set to 1 more than # of rows.
@@ -145,7 +164,7 @@ public class DatabaseAccessor implements SQLite.Trace, SQLite.Profile {
             writer.close();
             
         }
-        catch(java.lang.Exception e){
+        catch(SQLite.Exception e){
             System.err.println("Couldn't write card to database.");
             System.err.println(e.getMessage());
             e.printStackTrace();
@@ -190,17 +209,14 @@ public class DatabaseAccessor implements SQLite.Trace, SQLite.Profile {
      * @param name
      * @return
      */
-    private ItemCard getCard(String name){
-        String query = "select id from "+unitsTable+" where action='"+name+"'";
+    public ItemCard getItemCard(String name) throws DatabaseException, SQLite.Exception{
+        String query = "select id from "+unitsTable+" where name='"+name.toLowerCase()+"'";
         
         int lineNo = 0; // default
-        try {
-            lineNo = getInt(query); // get return integer from Query ('Count(*)')
-            if (lineNo == 0)
-                throw new DatabaseException("Coudln't find matching card in the database");
-        } catch (java.lang.Exception ex) {
-            Logger.getLogger(DatabaseAccessor.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        lineNo = getInt(query); // get return integer from Query ('Count(*)')
+        if (lineNo == 0)
+            throw new DatabaseException("Coudln't find matching card in the database");
+        
         return read(lineNo);        
     }
 
@@ -262,22 +278,27 @@ public class DatabaseAccessor implements SQLite.Trace, SQLite.Profile {
             return (ItemCard)returnObject;
         } catch (java.lang.Exception ex) {
             System.err.println("Couldn't read blob from database");
+            System.err.println(ex);
+            ex.printStackTrace();
             Logger.getLogger(DatabaseAccessor.class.getName()).log(Level.SEVERE, null, ex);
             return null;
         }
     }
-    /**
+    /** The input argument should be the searches you want to match with the
+     * database separated by colon.
      * 
-     * @param searchIds
-     * @return
+     * @param searchIds the string array with columns and search strings separated by colon.
+     * @return an integer array of the matching row numbers (ids)
      * @throws SQLite.Exception
      */
-    public int[] getRowNumbers(String... searchIds) throws SQLite.Exception {
+    private int[] getRowNumbers(String... searchIds) throws SQLite.Exception, DatabaseException {
         String query = "select id from "+unitsTable;
         for(int i=0;i<searchIds.length;i++)
         {
-            String[] s = searchIds[i].split(" ");
-            query = query+" where "+s[0]+"='"+s[1]+"'";
+            String[] s = searchIds[i].split(":");
+            if (s.length!=2)
+                throw new DatabaseException("search IDs must be two strings, a column name and a search string, separated by colon (:)");
+            query = query+" where "+s[0].trim()+"='"+s[1].trim()+"'";
             
         }
         Stmt stmt = prep_ins(db, query);
@@ -296,6 +317,27 @@ public class DatabaseAccessor implements SQLite.Trace, SQLite.Profile {
     }
 
     // primitive functions
+    private String[] getRows(String... searchIds) throws SQLite.Exception {
+        String query = "select * from "+unitsTable;
+        for(int i=0;i<searchIds.length;i++)
+        {
+            String[] s = searchIds[i].split(":");
+            query = query+" where "+s[0]+"='"+s[1]+"'";
+
+        }
+        Stmt stmt = prep_ins(db, query);
+
+        ArrayList<String> hits = new ArrayList<String>();
+        while(stmt.step()){
+            String row = "";
+            for (int i =0;i<stmt.column_count();i++)
+                row = row+", "+stmt.column_string(i);
+            hits.add(row);
+
+        } // end of while
+        String[] ret = hits.toArray(new String[hits.size()]);
+        return ret;
+    }
     private String[] getRows(String query) throws SQLite.Exception {
         
         Stmt statement = prep_ins(db, query);
@@ -372,203 +414,9 @@ public class DatabaseAccessor implements SQLite.Trace, SQLite.Profile {
         }
     }
 
-    // --- class Exceptions ---
-    class DatabaseException extends IOException{ // a local exception for database issues.
-        public DatabaseException(String message){
-            super(message);
-        }
-    }
-
-
-    
-    // --- TEST METHODS FROM EXAMPLE FILE(S) --- 
-    /**
-     *
-     * @param dba
-     */
-    public static void test2(DatabaseAccessor dba){
-        //  Test saving an object to database
-        dba.db.trace(dba);
-        ItemCard marineCard = new ItemCard("marine");
-        int rownumber = dba.write(marineCard); // String[] of idents currently not variable...
-        dba.delete(rownumber);
-        
-        Object fromDB = dba.read("marine");
-        ItemCard newItem = (ItemCard)fromDB;
-        Tools.printCard(newItem);
-    }
-    /**
-     *
-     * @param dbfile
-     */
-    public static void test(String dbfile) {
-	boolean error = true;
-        DatabaseAccessor T = new DatabaseAccessor();
-	System.out.println("LIB version: " + SQLite.Database.version());
-	SQLite.Database db = new SQLite.Database();
-	try {
-	    byte[] b;
-	    db.open(dbfile, 0666);
-	    System.out.println("DB version: " + db.dbversion());
-	    db.busy_timeout(1000);
-	    db.busy_handler(null);
-	    db.trace(T);
-	    //db.profile(T);
-            
-            try{
-                
-            T.do_exec(db, "create table B("+
-                    "id integer primary key, val blob)"); // key is not the "TYPE" the 'id' is set to be the "primary key" though
-	    T.do_exec(db, "create table Corpus("+
-		      "i integer, d double, action text, b blob)");
-            }
-            catch(SQLite.Exception ee){
-                System.out.println(ee.getMessage());
-                // couldn't create table
-            }
-            
-            
-	    T.do_select(db, "select * from sqlite_master");
-	    Stmt ins = T.prep_ins(db, "insert into Corpus(i,d, action,b)" +
-				  " VALUES(:one,:two,:three,:four)");
-	    System.out.println("INFO: " + ins.bind_parameter_count() +
-			       " parameters");
-            
-	    for (int i = 1; i <= ins.bind_parameter_count(); i++) {
-		String name = ins.bind_parameter_name(i);
-		if (name != null) {
-		    System.out.println("INFO: name for " + i + " is " + name);
-		    System.out.println("INFO: index of " + name + " is " +
-				       ins.bind_parameter_index(name));
-		}
-	    }
-	    // actually write somthing to database
-            b = new byte[4];
-	    b[0] = 1; b[1] = 1; b[2] = 2; b[3] = 3;
-	    T.do_ins(ins, 1, 2.4, "two point four", b);
-	    T.do_ins(ins);
-            
-	    b[0] = -1; b[1] = -2; b[2] = -3; b[3] = -4;
-	    T.do_ins(ins, 2, 4.8, "four point eight", b);
-	    T.do_ins(ins);
-            
-	    T.do_ins(ins, 3, -3.333, null, null);
-	    ins.close();
-            
-            
-            // WRITE A BLOB:
-	    T.do_exec(db, "insert into B values(NULL, zeroblob(128))");
-	    T.do_exec(db, "insert into B values(NULL, zeroblob(128))");
-	    T.do_exec(db, "insert into B values(NULL, zeroblob(128))");
-	    T.do_select(db, "select id from B");
-            
-            byte[] b128 = new byte[128];
-	    for (int i = 0; i < b128.length; i++) {
-		b128[i] = (byte) i;
-	    }
-            
-            Blob blob = db.open_blob("main", "B", "val", 1, true);
-	    OutputStream os = blob.getOutputStream();
-	    os.write(b128);
-	    os.close();
-	    blob.close();
-            
-            // now read the data back!
-            String rdTableName="B";
-            T.do_select(db, "select * from "+rdTableName); // is this necessary? NO...
-            
-            // main is the "schema?" B is the database, val is the column, number?, error code.
-            blob = db.open_blob("main", "B", "val", 1, true); // this likely IS necessary
-            
-            InputStream is = blob.getInputStream();
-	    is.skip(96);
-	    is.read(b);
-	    is.close();
-	    blob.close();
-	    System.out.println("INFO: expecting {96,97,98,99} got {" +
-			       b[0] + "," + b[1] + "," +
-			       b[2] + "," + b[3] + "}");
-            
-            
-            /* ------------------------ 
-                > > > SECTION 2 (My code) < < < 
-            * ------------------------ */
-            
-            // OK this works, now: can I write a java class?
-            class SimpleClass implements Serializable {
-                String name="simple name";
-               
-                
-            }
-            
-            SimpleClass cls = new SimpleClass() ;
-            // serialise it:
-            byte[] serialisedCls = Tools.Serialise(cls);
-            
-            Blob writer = db.open_blob("main", "B", "val", 2, true); // what's the number line!?
-            
-	    os = writer.getOutputStream();
-	    os.write(serialisedCls);
-	    os.close();
-	    writer.close();
-            
-            Blob inputBlob = db.open_blob("main", "B", "val", 2, true); // what's the number?
-            InputStream reader = inputBlob.getInputStream();
-            byte[] byteFlow = new byte[serialisedCls.length];
-            reader.read(byteFlow);
-            reader.close();
-            inputBlob.close();
-            
-            // deserialise it!!
-			//throws SQLException, IOException, ClassNotFoundException {
-            //ResultSet rs =  st.executeQuery("SELECT * FROM SerialTest");
-		byte[] buf = byteFlow;
-                Object returnCls = Tools.DeSerialise(byteFlow);
-		SimpleClass newCls = (SimpleClass)returnCls;
-                
-                System.out.println("Got class from db!!! Name is: "+newCls.name);
-            
-            // pseudo C code for reading the BLOB data
-//            execute(
-// "select type, data where key=%s order by serial", key
-//)
-            //T.do_select(db, "select ") DONT DO SELECT...
-            // unit = db.open_blob("main")
-            
-            
-            // some basic cleanup (like dropping the created database)
-            
-            //ins.close();
-            //T.do_exec(db, "drop table Corpus");
-            
-            
-            // end of 'try' statement. 
-	    error = false;
-	} 
-        catch (java.lang.Exception e) {
-	    System.err.println("error: " + e);
-	    e.printStackTrace();
-	} finally {
-	    try {
-		System.err.println("cleaning up ...");
-		try {
-                    // DONT DROP THE TABLE! Want to check it!
-		    T.do_exec(db, ".tables"); 
-		    
-		} catch(SQLite.Exception e) {
-		}
-		db.close();
-	    } catch(java.lang.Exception e) {
-		System.err.println("error (at cleanup): " + e);
-		error = true;
-	    } finally {
-		System.err.println("done.");
-	    }
-	}
-	if (error) {
-	    System.exit(1);
-	}
-    }
+    /// - - - - - - - -
+    ///     INHERITED METHODS FROM JAVASQLITE EXAMPLE
+    /// - - - - - - - -
     
     private int do_get_rows() throws SQLite.Exception {
         String statement = "select Count(*) from "+unitsTable;
@@ -664,6 +512,12 @@ public class DatabaseAccessor implements SQLite.Trace, SQLite.Profile {
 	    row++;
 	}
 	stmt.close();
+    }
+
+   class DatabaseException extends IOException{ // a local exception for database issues.
+        public DatabaseException(String message){
+            super(message);
+        }
     }
 }
 
