@@ -90,9 +90,25 @@ public class Tools {
         String[] tokens = str.split(" ");
         return tokens;
     }
+    /** merges strings with quotes around string arguments.
+     * This is appropriate for passing VALUES() to database
+     * 
+     * This version of the method defaults to a comma separator
+     * 
+     * @param array is the string array of [values]
+     * @returns a string of arguments that go into a SQL query.
+     */ 
     public static String mergeStrings2(String[] array){
         return mergeStrings2(array, ",");
     }
+    /** Merges strings for various uses, quoting the 'string' arguments.
+     * Integer arguments are passed without quotes.
+     * 
+     * @param strarray the array of arguments to be merged
+     * @param separator the separator character which is inserted inbetween the 
+     * contents of strarray
+     * @return 
+     */
     public static String mergeStrings2(String[] strarray, String separator){
         String output = "";
         for (int i = 0;i<strarray.length;i++)
@@ -109,6 +125,14 @@ public class Tools {
         }
         return output;
     }
+    /** A mergeStrings method that doesn't quote the arguments as opposed to mergeStrings2
+     * This is suitable for specifying columns to write to in the database i.e. to
+     * pass to the [tablename](column1, column2, ...) section of a SQL query.
+     * 
+     * @param strarray the strign array of arguments
+     * @param separator the separator character, usually one wants a comma.
+     * @return a merged string of arguments
+     */
     public static String mergeStrings(String[] strarray, String separator){
         String output = "";
         for (int i = 0;i<strarray.length;i++)
