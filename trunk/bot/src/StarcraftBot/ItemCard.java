@@ -81,7 +81,7 @@ public class ItemCard implements Serializable {
         
     
     }
-    public void update(String... arguments) throws CardException {
+    public void update(String... arguments) throws ItemCardException {
         for (int i = 0;i<arguments.length;i++){
             // note switching 'string' arguments is coming first in JDK 7
             String[] keyval = arguments[i].split(":");
@@ -133,19 +133,14 @@ public class ItemCard implements Serializable {
                 if(type =="building")
                     this.builtBy = value;
                 else
-                    throw new CardException("builtBy only applies to building.");
+                    throw new ItemCardException("builtBy only applies to building.");
             }
-            else throw new CardException("Couldn't interpret input string: "+arguments[i]);
+            else throw new ItemCardException("Couldn't interpret input string: "+arguments[i]);
                      
                         
         }
     }
 
-    class CardException extends java.lang.Exception{
-        CardException(String message){
-            super(message);
-        }
-    }
 
     class Addon implements Serializable {
         // class for the add-ons for each unit with additional requirements

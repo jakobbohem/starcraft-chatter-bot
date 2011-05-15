@@ -16,29 +16,27 @@ import java.util.*;
 public class DatabaseAccessor implements SQLite.Trace, SQLite.Profile {
 
     // member fields:
-    String dbFile = "corpus/database";
-    String unitsTable = "units"; //"Corpus";
-    String qTable = "questions";
-    String rTable = "replies";
-    String unknownDB = "unknownDB";
+    private String dbFile = "corpus/database";
+    private String unitsTable = "units"; //"Corpus";
+    private String qTable = "questions";
+    private String rTable = "replies";
+    private String unknownDB = "unknownDB";
     
-    String cards = "cards";
-    String cardColumn = "unitData";
-    SQLite.Database db = new SQLite.Database(); // integer primary key becomes 'alias' for rowid.
+    private String cards = "cards";
+    private String cardColumn = "unitData";
+    private SQLite.Database db = new SQLite.Database(); // integer primary key becomes 'alias' for rowid.
     
     // schemas
-    String[] querySchema = new String[] {"id integer primary key", "question text", "action text","actor integer", "object text", "queryId integer"};
-    String[] responseSchema = new String[] {"id integer primary key", "queryId integer", "cPhrase text"};
-    String[] schema = new String[] {"id integer primary key", "name text", cardColumn+" blob"}; // for the unit cards with info
-    String[] learningSchema = new String[] {"id integer primary key", "newNouns text"};
+    private String[] querySchema = new String[] {"id integer primary key", "question text", "action text","actor integer", "object text", "queryId integer"};
+    private String[] responseSchema = new String[] {"id integer primary key", "queryId integer", "cPhrase text"};
+    private String[] schema = new String[] {"id integer primary key", "name text", cardColumn+" blob"}; // for the unit cards with info
+    private String[] learningSchema = new String[] {"id integer primary key", "newNouns text"};
     
     // insert finder strins:
     String blobCols = Tools.parseColumns(schema);//"id, name, type, "+ cardColumn;
     
     int lineCount;
     int blobSize;
-    
-    int trycount; // times to retry operation if fail.
     
     // constr
     /**
@@ -58,7 +56,7 @@ public class DatabaseAccessor implements SQLite.Trace, SQLite.Profile {
             createTable(rTable, this.responseSchema);
             createTable(unknownDB, this.learningSchema);
             
-            trycount=5; // init the try count
+            //trycount=5; // init the try count
             
             
         } catch (SQLite.Exception ex) {
@@ -117,7 +115,7 @@ public class DatabaseAccessor implements SQLite.Trace, SQLite.Profile {
         catch(SQLite.Exception e){
             System.err.println("Error when writing to database");
             System.err.println(e.getMessage());
-        } catch(ItemCard.CardException e){
+        } catch(ItemCardException e){
             System.err.println("Error when writing to database");
             System.err.println(e.getMessage());
         }
@@ -217,7 +215,7 @@ public class DatabaseAccessor implements SQLite.Trace, SQLite.Profile {
         if (lineNo == 0)
             throw new DatabaseException("Coudln't find matching card in the database");
         
-        return read(lineNo);        
+        return (ItemCard)readBlob(lineNo);
     }
 
     /**
@@ -225,21 +223,36 @@ public class DatabaseAccessor implements SQLite.Trace, SQLite.Profile {
      * @param searchIds
      * @return
      */
-    public int getQid(String... searchIds){
-        // try to get all rows which match.
-
-        // if > 1 matches match with empty, the "lost rows"
-
-        // if no matches throw exception
-        return 0;
+    public int getQid(String... searchIds) throws DatabaseException {
+        int Qid = 0;
+        try {
+            // try to get all rows which match.
+            int[] Qids = getRowIntegerValues("Qid", searchIds);
+            if(Qids.length==0)
+                throw new DatabaseException("No rows matches query.");
+            if(Qids.length>1)
+                System.err.println("WARNING found >1 matching row, several Qids match: using first one.");
+             Qid= Qids[0];
+            
+        } catch (SQLite.Exception ex) {
+            Logger.getLogger(DatabaseAccessor.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        if( Qid ==0) throw new DatabaseException("Couldn't find matching Qid");
+        return Qid;
     }
     /**
      *
      * @param Qid
      * @return
      */
+    private Response getResponse(int Qid){
+       return new Response(); // this might not be needed if Anton is sensible about coding the Response-Objects
+    }
     public Response getCannedPhrase(int Qid){
-        return new Response();
+        int lineNo = Qid; // this assumption holds for now.
+        Object obj = readBlob(lineNo);
+        // cast object to a (else throw?)
+        return (Response)obj;
     }
 
     /**
@@ -247,7 +260,7 @@ public class DatabaseAccessor implements SQLite.Trace, SQLite.Profile {
      * @param searchId
      * @return
      */
-    private Object read(String searchId){
+    private ItemCard read(String searchId){
         String query = "select id from "+unitsTable+" where name='"+searchId+"'";
         
         int lineNo = 0; // default
@@ -256,14 +269,14 @@ public class DatabaseAccessor implements SQLite.Trace, SQLite.Profile {
         } catch (SQLite.Exception ex) {
             Logger.getLogger(DatabaseAccessor.class.getName()).log(Level.SEVERE, null, ex);
         }
-        return read(lineNo);        
+        return (ItemCard)readBlob(lineNo);
     }
     /**
      *
      * @param lineNo
      * @return
      */
-    public ItemCard read(int lineNo){
+    public Object readBlob(int lineNo){
         // just read some line.
         try {
 
@@ -292,7 +305,10 @@ public class DatabaseAccessor implements SQLite.Trace, SQLite.Profile {
      * @throws SQLite.Exception
      */
     private int[] getRowNumbers(String... searchIds) throws SQLite.Exception, DatabaseException {
-        String query = "select id from "+unitsTable;
+        return getRowIntegerValues("id", searchIds);
+    }
+    private int[] getRowIntegerValues(String column, String... searchIds) throws SQLite.Exception, DatabaseException {
+        String query = "select "+column+" from "+unitsTable;
         for(int i=0;i<searchIds.length;i++)
         {
             String[] s = searchIds[i].split(":");
@@ -438,6 +454,9 @@ public class DatabaseAccessor implements SQLite.Trace, SQLite.Profile {
      *
      * @param stmt
      */
+    public void initTrace(){
+        db.trace(this);
+    }
     public void trace(String stmt) {
 	System.out.println("TRACE: " + stmt);
     }
@@ -449,32 +468,22 @@ public class DatabaseAccessor implements SQLite.Trace, SQLite.Profile {
     public void profile(String stmt, long est) {
 	System.out.println("PROFILE(" + est + "): " + stmt);
     }
-    SQLite.Stmt prep_ins(SQLite.Database db, String sql)
+    private SQLite.Stmt prep_ins(SQLite.Database db, String sql)
 	throws SQLite.Exception {
 	return db.prepare(sql);
     }
-    void do_ins(SQLite.Stmt stmt) throws SQLite.Exception {
+    private void do_ins(SQLite.Stmt stmt) throws SQLite.Exception {
 	stmt.reset();
 	while (stmt.step()) {
 	}
     }
-    void do_ins(SQLite.Stmt stmt, int i, double d, String t, byte[] b)
-        throws SQLite.Exception {
-	stmt.reset();
-	stmt.bind(1, i);
-	stmt.bind(2, d);
-	stmt.bind(3, t);
-	stmt.bind(4, b);
-	while (stmt.step()) {
-	}
-    }
-    void do_exec(SQLite.Database db, String sql) throws SQLite.Exception {
+    private void do_exec(SQLite.Database db, String sql) throws SQLite.Exception {
 	SQLite.Stmt stmt = db.prepare(sql);
 	while (stmt.step()) {
 	}
 	stmt.close();
     }
-    void do_select(SQLite.Database db, String sql) throws SQLite.Exception {
+    private void do_select(SQLite.Database db, String sql) throws SQLite.Exception {
 	SQLite.Stmt stmt = db.prepare(sql);
 	int row = 0;
 	while (stmt.step()) {
