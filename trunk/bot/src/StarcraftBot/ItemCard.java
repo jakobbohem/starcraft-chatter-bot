@@ -38,6 +38,10 @@ public class ItemCard implements Serializable {
     String nUnits;
             
     // constr;
+    public ItemCard(String itemType, String name){
+        this.type=itemType;
+        this.name=name;
+    }
     public ItemCard(String unitType) {
         try {
             // just create a simple unit (marine) for now. then read from database.

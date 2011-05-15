@@ -16,7 +16,7 @@ import java.util.*;
 public class DatabaseAccessor implements SQLite.Trace, SQLite.Profile {
 
     // member fields:
-    private String dbFile = "corpus/database";
+    //private String dbFile = "corpus/database"; // constructor overload issues...
     private String unitsTable = "units"; //"Corpus";
     private String qTable = "questions";
     private String rTable = "replies";
@@ -45,6 +45,9 @@ public class DatabaseAccessor implements SQLite.Trace, SQLite.Profile {
      * The variable names are set in code here.
      */
     public DatabaseAccessor(){
+        this("corpus/database");
+    }
+    public DatabaseAccessor(String dbFile){
         this.db = new SQLite.Database();
         try {
             blobSize = (int)Math.pow(2,11); // in 2-power size; 2^11 = 2048
@@ -78,6 +81,10 @@ public class DatabaseAccessor implements SQLite.Trace, SQLite.Profile {
             }
     }
     
+    public void debug(){
+        // printing the queries passed to sqlite database through callback:
+        db.trace(this);
+    }
     // methods:
     /**
      *
@@ -467,14 +474,9 @@ public class DatabaseAccessor implements SQLite.Trace, SQLite.Profile {
 
         return outp; // should return parsed number of rows!
     }
+    
     // test file implementation methods:
-    /**
-     *
-     * @param stmt
-     */
-    public void initTrace(){
-        db.trace(this);
-    }
+    
     public void trace(String stmt) {
 	System.out.println("TRACE: " + stmt);
     }
@@ -498,7 +500,7 @@ public class DatabaseAccessor implements SQLite.Trace, SQLite.Profile {
 	stmt.close();
     }
 
-   class DatabaseException extends IOException{ // a local exception for database issues.
+   public class DatabaseException extends IOException{ // a local exception for database issues.
         public DatabaseException(String message){
             super(message);
         }
