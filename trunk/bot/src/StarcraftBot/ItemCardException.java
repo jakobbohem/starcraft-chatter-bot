@@ -1,10 +1,15 @@
 package StarcraftBot;
 
 public class ItemCardException extends Exception {
-   public ItemCardException(String message){
-       super(message);   }
+    private String msg;
+    private ItemCard card;
+    
+    public ItemCardException(String msg) {
+        super(msg);
+    }
 
-	public ItemCardException(String msg, ItemCard card){
-		System.err.print(msg);
-	}
+    public ItemCardException(String msg, ItemCard card) {
+        super(msg);
+        this.card = card;
+    }
 }
