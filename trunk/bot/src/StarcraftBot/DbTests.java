@@ -7,16 +7,15 @@ import SQLite.*;
 
 import StarcraftBot.DatabaseAccessor.DatabaseException;
 import java.io.*;
-
+import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 /**
  *
  * @author jakob
  */
 public class DbTests {
-
-
 
     // --- TEST METHODS FROM EXAMPLE FILE(S) ---
     /**
@@ -64,6 +63,21 @@ public class DbTests {
             System.err.println("Error in test!");
             System.err.println(e.getMessage());
             e.printStackTrace();
+        }
+    }
+    public static void testAdders(DatabaseAccessor dba){
+        try {
+            System.out.println("Testing adding question data to database...");
+            String question = "how";
+            ArrayList<String> members = new ArrayList<String>();
+            members.add("action: counter");
+            members.add("object: zergling");
+            Response r = new Response("[object] are countered by cheap tier [tier] units!");
+            r.addCannedPhrase("You can counter [object] with [object.counter]");
+            long Qid = dba.addQuery(question, members, r); //throws. maybe it shouldn't. we'll see
+            // think about deleting after...
+        } catch (DatabaseException ex) {
+            Logger.getLogger(DbTests.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
     /**

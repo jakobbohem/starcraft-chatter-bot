@@ -72,7 +72,7 @@ public class DatabaseAccessor implements SQLite.Trace, SQLite.Profile {
     private void createTable(String tablename, String[] schema){
         try{
             // create the three tables (unit data, query table, response table)
-            do_exec(db, "create table "+tablename+"("+Tools.mergeStrings(schema, ",") +")");
+            do_exec(db, "create table "+tablename+"("+Tools.mergeKeys(schema, ",") +")");
             // key is not the "TYPE" the 'id' is set to be the "primary key" though
 	    
             }
@@ -150,12 +150,12 @@ public class DatabaseAccessor implements SQLite.Trace, SQLite.Profile {
                 throw new DatabaseException("Card Already Exists in database. Use update() instead.");
 
             // ID is currently set to 1 more than # of rows.
-            this.lineCount = do_countRows()+1;
+            this.lineCount = do_countRows(unitsTable)+1;
             String id = Integer.toString(lineCount); // what should this be?
             
             // Add row with empty blob (no row number ... )
             String[] vals = new String[] {id, card.name};
-            do_exec(db, "insert into "+unitsTable+"("+blobCols+") values("+Tools.mergeStrings2(vals)+", zeroblob("+blobSize+"))");
+            do_exec(db, "insert into "+unitsTable+"("+blobCols+") values("+Tools.mergeValues(vals)+", zeroblob("+blobSize+"))");
 
             
             // get blob output stream 
@@ -176,7 +176,74 @@ public class DatabaseAccessor implements SQLite.Trace, SQLite.Profile {
         return lineCount;
         
     }
+    private int write(String tablename, String... strPairs) throws SQLite.Exception{
 
+        String[] keys = new String[strPairs.length];
+        String[] vals = new String[strPairs.length];
+        for(int i=0;i<strPairs.length;i++)
+        {
+            String[] s = strPairs[i].split(":");
+            keys[i] = s[0].trim();
+            vals[i] = s[1].trim();
+        }
+        int atRow = do_countRows(tablename)+1;
+        String query = "insert into "+tablename+"( id,"+Tools.mergeKeys(keys, ",")+" ) values( "+atRow+","+Tools.mergeValues(vals)+" )";
+        Stmt stmt = db.prepare(query);
+
+        // from do_exec
+        while (stmt.step()) {
+	}
+	stmt.close();
+//            if (s.length!=2)
+//                throw new DatabaseException("search IDs must be two strings, a column name and a search string, separated by colon (:)");
+//            if(i==0)
+//                query = query+" where "+s[0].trim()+"='"+s[1].trim()+"'";
+//            else
+//                query = query+" and "+s[0].trim()+"='"+s[1].trim()+"'";
+//        }
+        return atRow;
+    }
+
+    public long addQuery(String question, ArrayList<String> members, Response response) throws DatabaseException {
+        // version with the response-object writing to canned phrases in database.
+        // this is so that more than one canned phrase can be added at once.
+        // should question be able to be empty?
+            UUID queryId = UUID.randomUUID();
+            long Qid = queryId.getMostSignificantBits();
+        try{
+            // generate unique queryID:
+            // check for existance
+            String[] queryField = new String[members.size()+1];
+            queryField[0]="question:"+question;
+            System.arraycopy(members.toArray(new String[members.size()]), 0, queryField, 1, members.size());
+            if(getRowIntegerValues("id", qTable, queryField).length != 0) // row numbers
+                throw new DatabaseException("Row already present, cannot add duplicate match!");
+            
+            // if check is fine, also add Qid:
+            String[] newQueryField = new String[queryField.length+1];
+            newQueryField[0]="queryId:"+ Qid;// a unique id!
+            System.arraycopy(queryField, 0, newQueryField, 1, queryField.length);
+            write(qTable, newQueryField);
+
+            String[] cPhrases = response.cPhrases.toArray(new String[response.getNumberOfPhrases()]);
+            for (int i = 0;i<cPhrases.length;i++){
+                String[] responseField = new String[] {"queryId:"+Qid,"cPhrase:"+cPhrases[i]};
+                write(rTable, responseField);
+            }
+           }
+        catch(SQLite.Exception e){
+            // database error
+            System.err.println("Couldn't add Query to database");
+            System.err.println(e.getMessage());
+            e.printStackTrace();
+        }
+        return Qid;
+
+    }
+    public int updateRow(int row, String... fields){
+        // nothing here for now
+        return 0;
+    }
     // helper methods:
     /**
      *
@@ -194,7 +261,7 @@ public class DatabaseAccessor implements SQLite.Trace, SQLite.Profile {
                 String[] row = new String[ncol];
                 for (int i =0;i<ncol;i++)
                     row[i] = stmt.column_string(i);
-                System.out.println(" -"+nrow+" "+Tools.mergeStrings2(row));
+                System.out.println(" -"+nrow+" "+Tools.mergeValues(row));
                 list.add(row);
                 nrow++;
             }
@@ -387,7 +454,7 @@ public class DatabaseAccessor implements SQLite.Trace, SQLite.Profile {
             String[] row = new String[ncol];
             for (int i =0;i<ncol;i++)
                 row[i] = statement.column_string(i);
-            String stringrow = Tools.mergeStrings2(row, "|");
+            String stringrow = Tools.mergeValues(row, "|");
             list.add(stringrow);
         }
         statement.close();
@@ -456,8 +523,8 @@ public class DatabaseAccessor implements SQLite.Trace, SQLite.Profile {
     ///     INHERITED METHODS FROM JAVASQLITE EXAMPLE
     /// - - - - - - - -
     
-    private int do_countRows() throws SQLite.Exception {
-        return countRows(unitsTable);
+    private int do_countRows(String tablename) throws SQLite.Exception {
+        return countRows(tablename);
     }
     public int countRows(String tablename) throws SQLite.Exception{
         String query = "select Count(*) from "+tablename;
