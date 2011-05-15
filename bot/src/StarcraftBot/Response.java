@@ -4,6 +4,8 @@
  */
 package StarcraftBot;
 
+import java.util.ArrayList;
+
 /**
  *
  * @author jakob
@@ -13,6 +15,7 @@ package StarcraftBot;
 public class Response {
     // member fields
     String cPhrase; // the canned phrase reply. (could be >1 in the future)
+    public ArrayList<String> cPhrases; // if there are multiple ones.
     String[] knowledgeTokens; // should deprecate
     private String stringResponse;
     
@@ -29,14 +32,25 @@ public class Response {
     }
     public Response(String cannedPhrase, String[] insertTokens){
         this.cPhrase = cannedPhrase;
+        cPhrases = new ArrayList<String>();
         this.knowledgeTokens = insertTokens;
+        cPhrases.add(cannedPhrase);
     }
-    
+    public void addCannedPhrase(String cannedPhrase){
+        if(cPhrases ==null){
+            cPhrases = new ArrayList<String>();
+            cPhrases.add(cPhrase);
+        }
+        cPhrases.add(cannedPhrase);
+    }
     // public methods:
     public String processCannedPhrase(boolean plural){
         return Tools.DumbInsert(cPhrase, knowledgeTokens, plural);
     }
     public String getStringResponse(){
         return stringResponse;
+    }
+    public int getNumberOfPhrases(){
+        return cPhrases.size();
     }
 }

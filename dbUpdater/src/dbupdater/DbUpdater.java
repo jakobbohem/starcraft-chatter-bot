@@ -4,6 +4,7 @@
  */
 package dbupdater;
 import StarcraftBot.*;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Scanner;
 /**
@@ -18,28 +19,63 @@ public class DbUpdater {
     public static void main(String[] args) {
         try{
         // example of data that's pulled from somewhere (like the unknown DB)
+            if(args.length>0){
+                // use arguments to choose function
+                
+            }
+            else{
+                // choose from user input
+                Scanner input = new Scanner(System.in);
+                System.out.println("what would you like to do?");
+                String mode = input.nextLine();
+                if(mode.toLowerCase().equals("extendDB"))
+                    extendDB_poc();
+                else if(mode.toLowerCase().equals("addconsole"))
+                    runAddConsole();
+                else if(mode.toLowerCase().equals("addcsv"))
+                    runAddCSV();
+                else
+                System.out.println(String.format("Mode '%s' not available. Try '','' or ''",mode));
+                // do nothing
+            }
+        }// end of try
+        catch(java.lang.Exception e){
+            System.err.println("caught exception in main!!");
+            System.err.println(e.getMessage());
+            e.printStackTrace();
+                    
+        }
+    }
+    private static void runAddCSV(){
+
+    }
+    private static void runAddConsole(){
+        System.out.println(" - Running interactive add-to-database program -");
+
+    }
+    private static void extendDB_poc() throws IOException {
         String queryWithoutAnswer = "how do I counter zerglings with marines";
-        String databaseFile = "../trunk/bot/corpus/database";
-        
+        String databaseFile = "../bot/corpus/database";
+
         String question = "how";
         String action = "counter";
         String noun = "zergling";
         String actor = "marine";
-        
+
         boolean plural = true; // isn't used for now
-        
+
         Scanner scan = new Scanner(System.in);
-        
+
         // Here the question is in the database, but the itemCard lacks certain fields.
         String type = "UNKNOWN";
-        
+
         String[] nQs = new String[] {String.format("is %s a UNIT?", noun),
             String.format("what's the %s tier?",type),
             String.format("where is the %s built?", noun)
         }; // etc...
-        
+
         ArrayList<String> updates = new ArrayList<String>();
-        
+
         for(int i = 0;i<nQs.length;i++){
             System.out.println(nQs[i]);
             String answer = scan.nextLine();
@@ -68,22 +104,18 @@ public class DbUpdater {
             }
         }
         String cardName = noun; // just to show that it's the name of the card that is to be passed!
+        
         DatabaseAccessor dba = new DatabaseAccessor(databaseFile);
         dba.debug();
-        try{
+        try{ // here the write method throws an exceptino if the card is present.
+            // of course you could also check before attempting write...
             ItemCard card = new ItemCard(type, cardName);
             dba.write(card);
         } catch(DatabaseAccessor.DatabaseException e){
             // if the card exists!
             System.err.println(e.getMessage());
         }
+        // update the card info and save back to db.
         dba.updateItemCard(cardName, updates.toArray(new String[updates.size()]));
-        }
-        catch(java.lang.Exception e){
-            System.err.println("caught exception in main!!");
-            System.err.println(e.getMessage());
-            e.printStackTrace();
-                    
-        }
     }
 }

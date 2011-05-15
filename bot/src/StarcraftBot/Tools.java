@@ -62,7 +62,7 @@ public class Tools {
                 }
             }
         }
-        return mergeStrings(columns, ",");
+        return mergeKeys(columns, ",");
     }
     public static ArrayList<String> ReadFile(String filename) {
         ArrayList<String> fileContents = new ArrayList<String>();
@@ -99,8 +99,8 @@ public class Tools {
      * @param array is the string array of [values]
      * @returns a string of arguments that go into a SQL query.
      */ 
-    public static String mergeStrings2(String[] array){
-        return mergeStrings2(array, ",");
+    public static String mergeValues(String[] array){
+        return mergeValues(array, ",");
     }
     /** Merges strings for various uses, quoting the 'string' arguments.
      * Integer arguments are passed without quotes.
@@ -110,7 +110,7 @@ public class Tools {
      * contents of strarray
      * @return 
      */
-    public static String mergeStrings2(String[] strarray, String separator){
+    public static String mergeValues(String[] strarray, String separator){
         String output = "";
         for (int i = 0;i<strarray.length;i++)
         {
@@ -134,7 +134,7 @@ public class Tools {
      * @param separator the separator character, usually one wants a comma.
      * @return a merged string of arguments
      */
-    public static String mergeStrings(String[] strarray, String separator){
+    public static String mergeKeys(String[] strarray, String separator){
         String output = "";
         for (int i = 0;i<strarray.length;i++)
         {
@@ -164,7 +164,6 @@ public class Tools {
         }
         return cPhrase;
     }
-
     
     // Object serialiser for save to database
     public static byte[] Serialise(Object obj) throws IOException {

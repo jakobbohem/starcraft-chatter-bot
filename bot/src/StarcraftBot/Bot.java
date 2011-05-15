@@ -19,6 +19,7 @@ public class Bot {
         // Run basic database implementation test:
         DatabaseAccessor dba = new DatabaseAccessor();
         DbTests.test2(dba);
+        DbTests.testAdders(dba);
         
         // Run program
         int exitcode = 0;
