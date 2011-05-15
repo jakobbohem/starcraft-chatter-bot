@@ -8,14 +8,11 @@ import StarcraftBot.ItemCardException;
 
 public class BuildUnitAnswer extends Answer {
 	
-	public BuildUnitAnswer(String action, ItemCard actor){
-		super(action, actor);
+	public BuildUnitAnswer(){
+		super();
 	}
-	public BuildUnitAnswer(String action, ItemCard actor, List<ItemCard> itemCards){
-		super(action, actor, itemCards);
-	}
-	
-	public String buildAnswer() throws ItemCardException{
+
+	public String buildAnswer(String action, ItemCard actor, List<ItemCard> items) throws ItemCardException {
 		try {
 			if (super.actor.name==null)
 				throw new ItemCardException("name",super.actor);

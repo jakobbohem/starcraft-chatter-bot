@@ -5,23 +5,10 @@ import java.util.*;
 public abstract class Answer {
 	protected String action;
 	protected ItemCard actor;
-	protected List<ItemCard> itemCards;
+	protected List<ItemCard> items;
 
-	public Answer(String action, ItemCard actor){
-		this.action = action;
-		this.actor = actor;
+	public Answer(){
 	}
 	
-	public Answer(String action, ItemCard actor, List<ItemCard> itemCards){
-		this.action = action;
-		this.actor = actor;
-		this.itemCards = itemCards;
-	}	
-	
-	public void provideData(String action, ItemCard actor){
-		this.action = action;
-		this.actor = actor;
-	}
-	
-	public abstract String buildAnswer() throws ItemCardException;
+	public abstract String buildAnswer(String action, ItemCard actor, List<ItemCard> items) throws ItemCardException;
 }
