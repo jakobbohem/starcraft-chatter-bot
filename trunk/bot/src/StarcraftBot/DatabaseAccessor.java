@@ -450,7 +450,10 @@ public class DatabaseAccessor implements SQLite.Trace, SQLite.Profile {
     /// - - - - - - - -
     
     private int do_countRows() throws SQLite.Exception {
-        String query = "select Count(*) from "+unitsTable;
+        return countRows(unitsTable);
+    }
+    public int countRows(String tablename) throws SQLite.Exception{
+        String query = "select Count(*) from "+tablename;
         Stmt stmt = db.prepare(query);
         int outp = 0;
             try{
@@ -461,7 +464,7 @@ public class DatabaseAccessor implements SQLite.Trace, SQLite.Profile {
                 System.err.println("Coudln't get number of rows");
                 // couldn't parse this int...
             }
-        
+
         return outp; // should return parsed number of rows!
     }
     // test file implementation methods:
