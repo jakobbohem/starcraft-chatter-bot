@@ -11,6 +11,13 @@ public class GrammarEngine {
 		//query database of irregular verbs for 'verb';
 		//if in list, return 'past tense' field
 		
+		 //Replace this hacky stuff with a proper database call. Would be a lot quicker, too...
+		if(verb.equalsIgnoreCase("build"))
+			return "built";
+		else if(verb.equalsIgnoreCase("make"))
+			return "made";
+		
+		
 		char lastChar = verb.charAt(verb.length()-1);
 		
 		if (lastChar=='e'){
@@ -46,6 +53,11 @@ public class GrammarEngine {
 			return noun+"s";
 	}
 	
+	/**
+	 * Puts an "a" or an "an" before a noun, depending on whether or not the first letter is a vowel.
+	 * @param noun The noun
+	 * @return A string consisting of "a \<noun\>" or "an \<noun\>"
+	 */
 	public static String nounIndefinite(String noun){
 		if (isVowel(noun.charAt(0)))
 			return "an "+noun;
@@ -53,6 +65,9 @@ public class GrammarEngine {
 			return "a "+noun;
 	}
 	
+	/**
+	 * Checks whether or not a letter is a vowel. 
+	 */
 	private static boolean isVowel(char a){
 		if (a=='a' || a=='e'|| a=='i' || a=='o' || a=='u' || a=='y')
 			return true;

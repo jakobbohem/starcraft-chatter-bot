@@ -18,5 +18,10 @@ public abstract class Answer {
 		this.itemCards = itemCards;
 	}	
 	
+	public void provideData(String action, ItemCard actor){
+		this.action = action;
+		this.actor = actor;
+	}
+	
 	public abstract String buildAnswer() throws ItemCardException;
 }
