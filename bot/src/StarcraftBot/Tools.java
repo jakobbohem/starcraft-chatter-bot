@@ -6,6 +6,7 @@ package StarcraftBot;
 
 import java.util.ArrayList;
 import java.io.*;
+import java.util.regex.Pattern;
 /**
  *
  * @author jakob
@@ -149,7 +150,21 @@ public class Tools {
         }
         return output;
     }
-    
+
+    // Exapmle Dumb insert for canned phrases:
+    public static String DumbInsert(String cPhrase, String[] inserts, boolean plural){
+
+        // this assumes the second insert is the object.
+        if(plural) inserts[1] = inserts[1]+"s";
+
+        for (int i = 0;i<inserts.length;i++){ 
+            // Note: the backslash escape-characters
+            // in themselves need to be escaped.
+            cPhrase = cPhrase.replaceFirst("\\[\\]", inserts[i]);
+        }
+        return cPhrase;
+    }
+
     
     // Object serialiser for save to database
     public static byte[] Serialise(Object obj) throws IOException {

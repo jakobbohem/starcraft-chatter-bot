@@ -27,23 +27,38 @@ public class DbTests {
         try {
             try {
                 //  Test saving an object to database
-                dba.initTrace();
+                dba.initTrace(); // this isn't needed, but gives output of database queries.
                 ItemCard marineCard = new ItemCard("marine");
                 Tools.printCard(marineCard);
                 int rownumber = dba.write(marineCard); // this throws!
                 dba.delete(rownumber);
             }
             catch(DatabaseException e){
-                System.out.println("Coudln't write card. OK!");
+                System.out.println("Couldn't write card. OK!");
             }
-
                 dba.updateItemCard("Marine", "buildsAt: Command Centre", "buildTime: 200");
-
-                int Qid = dba.getQid("question:how", "action: build", "object:marines");
-                Response resp = dba.getCannedPhrase(Qid);
-
                 ItemCard newItem = dba.getItemCard("Marine");
                 Tools.printCard(newItem);
+
+
+                // TESTING a simple read/write case:
+                System.out.println("User: How do I build Marines?");
+                // no parsing logic in test...
+                String action = "build";
+                String question = "how";
+                String strObject = "marine";
+
+                ItemCard objectCard = dba.getItemCard(strObject);
+                int Qid = dba.getQid("question:"+question, "action: "+action, "object:"+strObject);
+
+                //Response resp = dba.getResponse(Qid); // not used for now
+                String cPhrase = dba.getCannedPhrase(Qid);
+
+                // handle the cPhrase, just insert in order for now.
+                String[] inserts = new String[] {action, strObject, objectCard.buildsAt};
+                String reply = Tools.DumbInsert(cPhrase, inserts, true); // true for plural.
+
+                System.out.println("AI Reply: "+reply);
             }
         catch(java.lang.Exception e){
             System.err.println("Error in test!");

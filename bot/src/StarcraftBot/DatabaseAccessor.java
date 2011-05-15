@@ -22,7 +22,6 @@ public class DatabaseAccessor implements SQLite.Trace, SQLite.Profile {
     private String rTable = "replies";
     private String unknownDB = "unknownDB";
     
-    private String cards = "cards";
     private String cardColumn = "unitData";
     private SQLite.Database db = new SQLite.Database(); // integer primary key becomes 'alias' for rowid.
     
@@ -144,7 +143,7 @@ public class DatabaseAccessor implements SQLite.Trace, SQLite.Profile {
                 throw new DatabaseException("Card Already Exists in database. Use update() instead.");
 
             // ID is currently set to 1 more than # of rows.
-            this.lineCount = do_get_rows()+1;
+            this.lineCount = do_countRows()+1;
             String id = Integer.toString(lineCount); // what should this be?
             
             // Add row with empty blob (no row number ... )
@@ -227,7 +226,7 @@ public class DatabaseAccessor implements SQLite.Trace, SQLite.Profile {
         int Qid = 0;
         try {
             // try to get all rows which match.
-            int[] Qids = getRowIntegerValues("Qid", searchIds);
+            int[] Qids = getRowIntegerValues("queryId", qTable, searchIds);
             if(Qids.length==0)
                 throw new DatabaseException("No rows matches query.");
             if(Qids.length>1)
@@ -240,19 +239,30 @@ public class DatabaseAccessor implements SQLite.Trace, SQLite.Profile {
         if( Qid ==0) throw new DatabaseException("Couldn't find matching Qid");
         return Qid;
     }
-    /**
+    /** THIS METHOD ISN'T CURRENTLY WORKING.
+     * PLEASE USE getCannedPhrase() instead
      *
      * @param Qid
      * @return
      */
     private Response getResponse(int Qid){
-       return new Response(); // this might not be needed if Anton is sensible about coding the Response-Objects
-    }
-    public Response getCannedPhrase(int Qid){
+        // think about returning several canned phrases from db and adding to a
+        // response object rather than keeping the object in db. it's up for grabs.
         int lineNo = Qid; // this assumption holds for now.
-        Object obj = readBlob(lineNo);
+        Object obj = readBlob(lineNo, rTable, "cPhrase");
         // cast object to a (else throw?)
         return (Response)obj;
+    }
+    public String getCannedPhrase(int Qid) throws SQLite.Exception {
+        int lineNo = Qid; // this assumption holds for now.
+        String query = "select cPhrase from "+rTable+" where queryId="+Qid;
+        String cPhrase = "";
+        Stmt stmt = db.prepare(query);
+        while(stmt.step()){ // getting the last one, should be just 1 though...
+            cPhrase = stmt.column_string(0);
+        }
+        return cPhrase;
+
     }
 
     /**
@@ -277,10 +287,13 @@ public class DatabaseAccessor implements SQLite.Trace, SQLite.Profile {
      * @return
      */
     public Object readBlob(int lineNo){
+        return readBlob(lineNo, unitsTable, cardColumn);
+    }
+    public Object readBlob(int lineNo, String table, String column){
         // just read some line.
         try {
 
-            Blob inputBlob = db.open_blob("main", unitsTable, cardColumn, lineNo, true);
+            Blob inputBlob = db.open_blob("main", table, column, lineNo, true);
             InputStream reader = inputBlob.getInputStream();
             byte[] byteFlow = new byte[blobSize];
             reader.read(byteFlow);
@@ -305,19 +318,21 @@ public class DatabaseAccessor implements SQLite.Trace, SQLite.Profile {
      * @throws SQLite.Exception
      */
     private int[] getRowNumbers(String... searchIds) throws SQLite.Exception, DatabaseException {
-        return getRowIntegerValues("id", searchIds);
+        return getRowIntegerValues("id", unitsTable, searchIds);
     }
-    private int[] getRowIntegerValues(String column, String... searchIds) throws SQLite.Exception, DatabaseException {
-        String query = "select "+column+" from "+unitsTable;
+    private int[] getRowIntegerValues(String column, String table, String... searchIds) throws SQLite.Exception, DatabaseException {
+        String query = "select "+column+" from "+table;
         for(int i=0;i<searchIds.length;i++)
         {
             String[] s = searchIds[i].split(":");
             if (s.length!=2)
                 throw new DatabaseException("search IDs must be two strings, a column name and a search string, separated by colon (:)");
-            query = query+" where "+s[0].trim()+"='"+s[1].trim()+"'";
-            
+            if(i==0)
+                query = query+" where "+s[0].trim()+"='"+s[1].trim()+"'";
+            else
+                query = query+" and "+s[0].trim()+"='"+s[1].trim()+"'";
         }
-        Stmt stmt = prep_ins(db, query);
+        Stmt stmt = db.prepare(query);
         
         ArrayList<Integer> hits = new ArrayList<Integer>();
         while(stmt.step()){
@@ -341,7 +356,7 @@ public class DatabaseAccessor implements SQLite.Trace, SQLite.Profile {
             query = query+" where "+s[0]+"='"+s[1]+"'";
 
         }
-        Stmt stmt = prep_ins(db, query);
+        Stmt stmt = db.prepare(query);
 
         ArrayList<String> hits = new ArrayList<String>();
         while(stmt.step()){
@@ -356,7 +371,7 @@ public class DatabaseAccessor implements SQLite.Trace, SQLite.Profile {
     }
     private String[] getRows(String query) throws SQLite.Exception {
         
-        Stmt statement = prep_ins(db, query);
+        Stmt statement = db.prepare(query);
         ArrayList<String> list = new ArrayList<String>();
         int ncol = statement.column_count();
                 
@@ -376,8 +391,8 @@ public class DatabaseAccessor implements SQLite.Trace, SQLite.Profile {
      * for example a single column name. In the case of too much data, the first
      *  element will be returned;
     */
-    private String getString(String query) throws SQLite.Exception {
-        Stmt statement = prep_ins(db, query);
+    private String getRowAsString(String query) throws SQLite.Exception {
+        Stmt statement = db.prepare(query);
         String delim = " | ";
         while(statement.step())
         {
@@ -393,7 +408,7 @@ public class DatabaseAccessor implements SQLite.Trace, SQLite.Profile {
     }
     private int getInt(String query) throws SQLite.Exception {
         
-        Stmt stmt = prep_ins(db, query);
+        Stmt stmt = db.prepare(query);
         int outp = 0;
             try{
                 stmt.step();
@@ -434,9 +449,9 @@ public class DatabaseAccessor implements SQLite.Trace, SQLite.Profile {
     ///     INHERITED METHODS FROM JAVASQLITE EXAMPLE
     /// - - - - - - - -
     
-    private int do_get_rows() throws SQLite.Exception {
-        String statement = "select Count(*) from "+unitsTable;
-        Stmt stmt = prep_ins(db, statement);
+    private int do_countRows() throws SQLite.Exception {
+        String query = "select Count(*) from "+unitsTable;
+        Stmt stmt = db.prepare(query);
         int outp = 0;
             try{
                 stmt.step();
@@ -468,10 +483,6 @@ public class DatabaseAccessor implements SQLite.Trace, SQLite.Profile {
     public void profile(String stmt, long est) {
 	System.out.println("PROFILE(" + est + "): " + stmt);
     }
-    private SQLite.Stmt prep_ins(SQLite.Database db, String sql)
-	throws SQLite.Exception {
-	return db.prepare(sql);
-    }
     private void do_ins(SQLite.Stmt stmt) throws SQLite.Exception {
 	stmt.reset();
 	while (stmt.step()) {
@@ -480,45 +491,6 @@ public class DatabaseAccessor implements SQLite.Trace, SQLite.Profile {
     private void do_exec(SQLite.Database db, String sql) throws SQLite.Exception {
 	SQLite.Stmt stmt = db.prepare(sql);
 	while (stmt.step()) {
-	}
-	stmt.close();
-    }
-    private void do_select(SQLite.Database db, String sql) throws SQLite.Exception {
-	SQLite.Stmt stmt = db.prepare(sql);
-	int row = 0;
-	while (stmt.step()) {
-	    int i, ncol = stmt.column_count();
-	    System.out.println("=== ROW " + row + "===");
-	    for (i = 0; i < ncol; i++) {
-		try {
-		    System.out.print(stmt.column_database_name(i) + "." +
-				     stmt.column_table_name(i) + "." +
-				     stmt.column_origin_name(i) + "<" +
-				     stmt.column_decltype(i) + ">=");
-		} catch (SQLite.Exception se) {
-		    System.out.print("COLUMN#" + i + "<" +
-				     stmt.column_decltype(i) + ">=");
-		}
-		Object obj = stmt.column(i);
-		if (obj == null) {
-		    System.out.println("null<null>");
-		} else if (obj instanceof byte[]) {
-		    byte[] b = (byte[]) obj;
-		    String sep = "";
-		    System.out.print("{");
-		    for (i = 0; i < b.length; i++) {
-			System.out.print(sep + b[i]);
-			sep = ",";
-		    }
-		    System.out.print("}");
-		} else {
-		    System.out.print(obj.toString());
-		}
-		if (obj != null) {
-		    System.out.println("<" + obj.getClass().getName() + ">");
-		}
-	    }
-	    row++;
 	}
 	stmt.close();
     }

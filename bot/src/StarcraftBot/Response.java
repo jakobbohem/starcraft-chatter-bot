@@ -12,6 +12,7 @@ package StarcraftBot;
  */
 public class Response {
     // member fields
+    String cPhrase; // the canned phrase reply. (could be >1 in the future)
     String[] knowledgeTokens; // should deprecate
     private String stringResponse;
     
@@ -26,8 +27,15 @@ public class Response {
             tokenlist = tokenlist+", ";
         stringResponse = tokenlist;
     }
+    public Response(String cannedPhrase, String[] insertTokens){
+        this.cPhrase = cannedPhrase;
+        this.knowledgeTokens = insertTokens;
+    }
     
     // public methods:
+    public String processCannedPhrase(boolean plural){
+        return Tools.DumbInsert(cPhrase, knowledgeTokens, plural);
+    }
     public String getStringResponse(){
         return stringResponse;
     }
