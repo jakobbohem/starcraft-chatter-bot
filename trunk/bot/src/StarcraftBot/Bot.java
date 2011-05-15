@@ -21,7 +21,7 @@ public class Bot {
         DbTests.test2(dba);
         
         // Run program
-        int exitcode = 1;
+        int exitcode = 0;
         Scanner scan = new Scanner(System.in);
         
         while(exitcode != 1)
@@ -51,7 +51,8 @@ public class Bot {
                 // do some interpretation:
                 Interpreter Jeeves = new Interpreter();
                 Query q = Jeeves.interpretTags(tags, inputs);
-                String answer = Jeeves.getReply(q);
+                // String answer = Jeeves.getReply(q); // old file read method
+                String answer = Jeeves.getReply(q, dba);
                 System.out.println(Jeeves.name+": "+answer);
             }
             catch(Exception e){

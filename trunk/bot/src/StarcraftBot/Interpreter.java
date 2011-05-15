@@ -3,8 +3,11 @@
  * and open the template in the editor.
  */
 package StarcraftBot;
+import StarcraftBot.DatabaseAccessor.DatabaseException;
 import java.io.*;
 import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 /**
  *
  * @author jakob
@@ -35,34 +38,73 @@ public class Interpreter {
         // It may be done in a smoother way...
         
         // ALSO NOTE: Right now there is no double checking. It's the LAST action/ target pair that will be used!
+        String question = null;
         String action = null;
-        String target = null;
+        String strobject = null;
         // assuming length(tags) == length(inputs) CHECK!
         for (int i = 0; i < tags.length; i++){
             // first find the action!
             if("action".equals(tags[i])) // not to be hard coded?
-            {    action = inputs[i];
+            {   action = inputs[i];
                 if ("unit".equals(tags[i+1]))
-                    target = inputs[i+1];
+                    strobject = inputs[i+1];
                 else if ("unit".equals(tags[i+2])) // better check for the relationship between action and target?
-                    target = inputs[i+2];
+                    strobject = inputs[i+2];
             }
-                
+            if("question".equals(tags[i]))
+                question = inputs[i];
+           
         }
-        if (action!=null && target != null){
-            Query query = new Query(action, target);
-            return query;
+        Query query = null;
+        if (action!=null && strobject != null){
+            if(action!=null && strobject != null && question!= null)
+                query = new Query(action, strobject, question);
+            else
+                query = new Query(action, strobject);
+
+        // - - - - -
+        //      NOTE: THESE SETTINGS MIGHT HAVE TO BE SET IN CONSTRUCTOR:
+        // - - - - -
+            // Set query member fields:
+            query.setTokens(inputs);
+            query.setTags(tags);
+            if(strobject.endsWith("s"))
+                query.isPlural=true;
+            else
+                query.isPlural=false;
+
+
+        return query;
         }
-        else throw new SparseSpecException("(at least) Action and Target must be defined to generate Query");
-        
+        else throw new SparseSpecException("(at least) Action and Target must be defined to generate Query");   
     }
-    public String getReply(Query query){
+    public String getReply(Query query, DatabaseAccessor dba){
         String reply;
-        if(query.checkNotNull())
+        if(query.baseCheckNotNull())
+        {
+            try {
+                //String[] databaseEntry = match(query, this.responseDatafile); // change to some REAL database!
+                Response response = match2(query, dba); //generateReply(databaseEntry);
+                reply = generateReply(response, query.isPlural);//generateReply(databaseEntry);
+            } catch (DatabaseException ex) {
+                reply = "Database-exception: "+ex.getMessage();
+                Logger.getLogger(Interpreter.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (SQLite.Exception ex) {
+                reply = "Couldn't communicate with database, missing reply!";
+                Logger.getLogger(Interpreter.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+        else
+            reply = "Couldn't find all the relevant params in Query. Please enter new query. DEBUG: Check 'Interpreter'";
+        return reply;
+    }
+    public String oldGetReply(Query query){
+        String reply;
+        if(query.baseCheckNotNull())
         {
             //String[] databaseEntry = match(query, this.responseDatafile); // change to some REAL database!
             Response response = match(query); // to the current database (knowledgebase)
-            reply = generateReply(response);//generateReply(databaseEntry);
+            reply = oldGenerateReply(response);//generateReply(databaseEntry);
         }
         else
             reply = "Couldn't find all the relevant params in Query. Please enter new query. DEBUG: Check 'Interpreter'";
@@ -70,7 +112,10 @@ public class Interpreter {
     }
     
     // private methods
-    private String generateReply(Response r){
+    private String generateReply(Response r, boolean plural){
+        return r.processCannedPhrase(plural);
+    }
+    private String oldGenerateReply(Response r){
         return r.getStringResponse();
     }
 //    private String generateReply(String[] data){
@@ -107,6 +152,21 @@ public class Interpreter {
             System.out.println("Couldn't load replies data");
         }
         return responseDataArray[0]; //new String[] {"Default","Data","Reply"};
+    }
+    private Response match2(Query query, DatabaseAccessor dba) throws DatabaseException, SQLite.Exception{
+        // now, the order is [question, action, object] which won't match legacy method match().
+        String[] keywords = query.getMetadata();
+        String q = keywords[0];
+        String a = keywords[1];
+        String ob = keywords[2];
+        ItemCard card = dba.getItemCard(ob);
+
+        // NOTE: the fields are private fields in dba, but currently contain:
+        // id, question, action, actor, object, queryId
+        String cPhrase = dba.getCannedPhrase(dba.getQid("question:"+q,"action:"+a,"object:"+ob));
+        // this is super dumb. the order should be handled in a clever way.
+        Response r = new Response(cPhrase, new String[] {a, ob, card.buildsAt});
+        return r;
     }
     private Response match(Query query) {
         String[] keywords = query.getMetadata();
