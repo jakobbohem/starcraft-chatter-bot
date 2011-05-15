@@ -69,6 +69,7 @@ public class DbUpdater {
         }
         String cardName = noun; // just to show that it's the name of the card that is to be passed!
         DatabaseAccessor dba = new DatabaseAccessor(databaseFile);
+        dba.debug();
         try{
             ItemCard card = new ItemCard(type, cardName);
             dba.write(card);
