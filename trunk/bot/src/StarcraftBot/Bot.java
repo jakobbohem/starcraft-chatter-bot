@@ -63,7 +63,7 @@ public class Bot {
                     //String answer = Jeeves.getReply(q, dba);
                     
                     //New shiny getAnswer method.
-                    String answer = ab.getAnswer(qb.getQID(q), q);
+                    answer = ab.getAnswer(qb.getQID(q), q);
 
                     System.out.println(Jeeves.name + ": " + answer);
                 } catch (DatabaseException dbe) {
