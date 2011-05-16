@@ -65,6 +65,16 @@ public class Query {
             return new String[] {action, object};
         else return new String[] {""};
     }
+    
+    public String[] buildSearchPhrase() {
+        if(hardCheckNotNull())
+            return new String[] {"action:"+action, "question:"+question, "object:"+object, "actor:"+actor};
+        else if(checkNotNull())
+            return new String[] {"question:"+question, "action:"+action, "object:"+object};
+        else if(baseCheckNotNull())
+            return new String[] {"action:"+action, "object:"+object};
+        else return new String[] {""};
+    }
 
     // setter methods:
     public void setTokens(String[] inp){
