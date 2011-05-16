@@ -63,7 +63,10 @@ public class AnswerBuilder {
                     else if (objectField.equals("techTree"))
                         replacement = readTechTree(actor, grammar);
                     //etc. One elif for every field in the itemCard. Not very pretty. Better way to do this?
-                            
+                    /*Fields remaining: type, builtBy, size, counter, 
+                     * strongAgainst, buildTime, health, armour, food, 
+                     * mineralCost, gasCos, tier
+                     */
                 }
                 //Like actor, but checks which entries in the list 'items' to use.
                 else if (object.equals("object")){
