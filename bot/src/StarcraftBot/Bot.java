@@ -42,6 +42,7 @@ public class Bot {
                 // no number was in the exit string - that's fine for now                
 
                 // do the parsing and interpretation:
+                String answer = "[empty]";
                 try {
                     Tagger tagger = new Tagger();
                     String[] inputs = tagger.chopString(inp); // also sets the lastUsedString property
@@ -55,7 +56,7 @@ public class Bot {
                     Interpreter Jeeves = new Interpreter();
                     Query q = Jeeves.interpretTags(tags, inputs);
                     // String answer = Jeeves.getReply(q); // old file read method
-                    String answer = Jeeves.getReply(q, dba);
+                    answer = Jeeves.getReply(q, dba);
                     System.out.println(Jeeves.name + ": " + answer);
                 } catch (DatabaseException dbe) {
                     System.out.println("DEBUG: Exception in main!");
@@ -64,7 +65,8 @@ public class Bot {
 
                 } catch (SparseSpecException e) {
                     System.out.println("DEBUG: Exception in main!");
-                    System.out.println(e);
+                    answer = "I couldn't understand that. Please ask a question (incl. action and object)";
+                    //System.out.println(e);
                     //e.printStackTrace();
 
                 } catch (ExecutionOrderException e) {
@@ -72,6 +74,8 @@ public class Bot {
                     System.out.println(e);
                     //e.printStackTrace();
 
+                } finally{
+                    System.out.println("Jeeves: "+answer);
                 }
                 // now get the labels and print them!
             } // end of while
