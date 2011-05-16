@@ -77,7 +77,8 @@ public class DbTests {
             long Qid = dba.addQuery(question, members, r); //throws. maybe it shouldn't. we'll see
             // think about deleting after...
         } catch (DatabaseException ex) {
-            Logger.getLogger(DbTests.class.getName()).log(Level.SEVERE, null, ex);
+            System.out.println(ex.getMessage());
+            Logger.getLogger(DbTests.class.getName()).log(Level.INFO, null, ex);
         }
     }
     /**
