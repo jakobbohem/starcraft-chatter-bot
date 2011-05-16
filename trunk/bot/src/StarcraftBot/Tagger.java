@@ -15,6 +15,7 @@ public class Tagger {
     TreeMap<String, String> tags2;
     final String corpusFile = "corpus/datafile.txt";
     final String tagsFile = "corpus/wordVals.txt";
+    private ArrayList<ArrayList> tagList;
     
     // constr;
     public Tagger()
@@ -35,6 +36,25 @@ public class Tagger {
         String[] chunks = input.split(" ");
         this.lastChunks = chunks;
         return chunks;
+    }
+    
+    public void debugTags()
+    {
+        ListIterator<ArrayList> tagListitr = tagList.listIterator();
+        ListIterator tagListitr2;
+        ArrayList tagEntry2;
+        while(tagListitr.hasNext())
+        {   
+            tagEntry2 = tagListitr.next();
+            tagListitr2 = tagEntry2.listIterator();
+            System.out.print("Next entry: \n");
+            while(tagListitr2.hasNext())
+            {
+                System.out.print("This entry is " + tagListitr2.next() + " ");
+            }
+            
+        }
+            
     }
     
     public String[] getTagsFromDatabase() throws ExecutionOrderException, IOException {// returns tags, use presaved vars
@@ -64,17 +84,23 @@ public class Tagger {
         
         BufferedReader in = new BufferedReader(new FileReader(tagsFile));
         tags2 = new TreeMap<String, String>();
+        tagList = new ArrayList<ArrayList>();
+       // ArrayList<String> tempEntry = new ArrayList<String>();
         String strLine;
         while((strLine = in.readLine())!= null)
         {
             if(!strLine.isEmpty())
                 if(!"#".equals(strLine.substring(0, 1)))
                 {
-                    String[] pair = strLine.split("\t");
-                    String key = pair[0].toLowerCase(); String value = pair[1].toLowerCase();
-                    tags2.put(key, value);
+                    ArrayList<String> tempEntry = new ArrayList<String>();
+                    String[] entries = strLine.split("-");
+                    tempEntry.addAll(Arrays.asList(entries));
+                    tagList.add(tempEntry);
+                  //  String key = pair[0].toLowerCase(); String value = pair[1].toLowerCase();
+                   // tags2.put(key, value);
                 }
         }
+      //  debugTags();
     }
     private void createCorpus(){
         // create the corpus to derive the probabilities for the text tagger.
@@ -87,4 +113,5 @@ public class Tagger {
     
     // get-set nightmare.
     public String[] getLastChunks(){return this.lastChunks;}
+    public ArrayList<ArrayList> getTagList(){return this.tagList;}
 }
