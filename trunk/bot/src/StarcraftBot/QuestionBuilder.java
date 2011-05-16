@@ -15,7 +15,7 @@ public class QuestionBuilder {
     }
     
     public int getQID(Query q) throws Exception{
-        String[] md = q.getMetadata();
+        String[] md = q.buildSearchPhrase();
         return dba.getQid(md);
     }
     
