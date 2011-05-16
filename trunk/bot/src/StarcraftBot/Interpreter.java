@@ -33,7 +33,7 @@ public class Interpreter {
     Interpreter(String name){this.name=name;}
     
     // public methods
-    public Query interpretTags(String[] tags, String[] inputs) throws SparseSpecException {
+    public Query interpretTags(ArrayList<ArrayList> tags, String input) throws SparseSpecException {
         // NOTE: Right now the generator just if-elses through the tags specified in the database (or corpus/wordVals.txt)
         // It may be done in a smoother way...
         
@@ -41,20 +41,79 @@ public class Interpreter {
         String question = null;
         String action = null;
         String strobject = null;
-        // assuming length(tags) == length(inputs) CHECK!
-        for (int i = 0; i < tags.length; i++){
-            // first find the action!
-            if("action".equals(tags[i])) // not to be hard coded?
-            {   action = inputs[i];
-                if ("unit".equals(tags[i+1]))
-                    strobject = inputs[i+1];
-                else if ("unit".equals(tags[i+2])) // better check for the relationship between action and target?
-                    strobject = inputs[i+2];
-            }
-            if("question".equals(tags[i]))
-                question = inputs[i];
+        boolean foundq = false;
+        boolean founda = false;
+        boolean foundobj = false;
+        boolean objplural = false;
            
-        }
+        // assuming length(tags) == length(inputs) CHECK!
+//        for (int i = 0; i < tags.length; i++){
+//            // first find the action!
+//            if("action".equals(tags[i])) // not to be hard coded?
+//            {   action = inputs[i];
+//                if ("unit".equals(tags[i+1]))
+//                    strobject = inputs[i+1];
+//                else if ("unit".equals(tags[i+2])) // better check for the relationship between action and target?
+//                    strobject = inputs[i+2];
+//            }
+//            if("question".equals(tags[i]))
+//                question = inputs[i];     
+ //            }
+        ArrayList<ArrayList> taglist = tags;
+        ListIterator<ArrayList> tagListitr = taglist.listIterator();
+        // Find question first
+       while(tagListitr.hasNext() && !foundq)
+       {
+           ArrayList<String> temp = tagListitr.next();
+           System.out.print(temp.get(0));
+           ListIterator<String> tempitr = temp.listIterator();
+           while(tempitr.hasNext())
+           {
+               String tempstr = tempitr.next();
+               if(input.indexOf(tempstr) >= 0)
+               {
+                   question = temp.get(1);
+                   System.out.println("Found a question!");
+                   foundq = true;
+                   break;
+               }
+           }
+       }
+       // Then find the action
+       while(tagListitr.hasNext() && !founda)
+       {
+           ArrayList<String> temp = tagListitr.next();
+           System.out.print(temp.get(0));
+           ListIterator<String> tempitr = temp.listIterator();
+           while(tempitr.hasNext())
+           {
+               String tempstr = tempitr.next();
+               if(input.indexOf(tempstr) >= 0)
+               {
+                   action = temp.get(1);
+                   System.out.println("Found a action!");
+                   founda = true;
+                   break;
+               }
+           }
+       }
+       while(tagListitr.hasNext() && !foundobj)
+       {
+           ArrayList<String> temp = tagListitr.next();
+           System.out.print(temp.get(0));
+           ListIterator<String> tempitr = temp.listIterator();
+           while(tempitr.hasNext())
+           {
+               String tempstr = tempitr.next();
+               if(input.indexOf(tempstr) >= 0)
+               {
+                   strobject = temp.get(1);
+                   System.out.println("Found a object!");
+                   foundobj = true;
+                   break;
+               }
+           }
+       }
         Query query = null;
         if (action!=null && strobject != null){
             if(action!=null && strobject != null && question!= null)
@@ -66,8 +125,8 @@ public class Interpreter {
         //      NOTE: THESE SETTINGS MIGHT HAVE TO BE SET IN CONSTRUCTOR:
         // - - - - -
             // Set query member fields:
-            query.setTokens(inputs);
-            query.setTags(tags);
+          //  query.setTokens(inputs);
+            //query.setTags(tags);
             if(strobject.endsWith("s"))
                 query.isPlural=true;
             else
