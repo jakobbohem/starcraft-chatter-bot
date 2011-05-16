@@ -46,6 +46,7 @@ public class Bot {
 
                 // do the parsing and interpretation:
                 String answer = "[empty]";
+                Interpreter Jeeves = new Interpreter();
                 try {
                     Tagger tagger = new Tagger();
                     String[] inputs = tagger.chopString(inp); // also sets the lastUsedString property
@@ -56,7 +57,7 @@ public class Bot {
                     Tools.printArray(tags);
 
                     // do some interpretation:
-                    Interpreter Jeeves = new Interpreter();
+                    
                     Query q = Jeeves.interpretTags(tags, inputs);
                     
                     // String answer = Jeeves.getReply(q); // old file read method
@@ -65,25 +66,25 @@ public class Bot {
                     //New shiny getAnswer method.
                     answer = ab.getAnswer(qb.getQID(q), q);
 
-                    System.out.println(Jeeves.name + ": " + answer);
+                    
                 } catch (DatabaseException dbe) {
-                    System.out.println("DEBUG: Exception in main!");
+                    System.out.println("DEBUG: DatabaseException in main!");
                     System.out.println(dbe);
-                    //e.printStackTrace();
+                    dbe.printStackTrace();
 
                 } catch (SparseSpecException e) {
-                    System.out.println("DEBUG: Exception in main!");
+                    System.out.println("DEBUG: SparseException in main!");
                     answer = "I couldn't understand that. Please ask a question (incl. action and object)";
                     //System.out.println(e);
-                    //e.printStackTrace();
+                    e.printStackTrace();
 
                 } catch (ExecutionOrderException e) {
-                    System.out.println("DEBUG: Exception in main!");
+                    System.out.println("DEBUG: ExecutionOrderException in main!");
                     System.out.println(e);
-                    //e.printStackTrace();
+                    e.printStackTrace();
 
                 } finally{
-                    System.out.println("Jeeves: "+answer);
+                    System.out.println(Jeeves.name + ": " + answer);
                 }
                 // now get the labels and print them!
             } // end of while
