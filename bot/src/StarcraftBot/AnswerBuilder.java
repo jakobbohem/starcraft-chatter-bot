@@ -4,16 +4,29 @@
  */
 package StarcraftBot;
 
-import java.util.List;
+import java.util.*;
 import java.util.regex.*;
+import java.io.IOException;
 
 /**
- *
+ * Notes for usage: The cannedPhrase string in the database should use placeholders
+ * on the form %object&objectField&grammarTag%. If the object is "action", the
+ * objectField mustn't be present. The grammarTag is defined as:
+ * <b>Nouns</b>:<br>
+ *  i: <i>indefinite singular</i> (a marine)<br>
+ *  p: <i>plural</i> (marines)<br>
+ *  anything else: <i>base form</i> (marine)<br>
+ * <b>Verbs</b>:<br>
+ *  p: <i>past tense</i> (created, countered)<br>
+ *  anything else: <i>base form</i> (create, counter)<br>
  * @author antonsorensen
  */
 public class AnswerBuilder {
 
-    public AnswerBuilder() {
+    private DatabaseAccessor dba;
+
+    public AnswerBuilder(DatabaseAccessor dba) {
+        this.dba = dba;
     }
 
     /**
@@ -30,46 +43,56 @@ public class AnswerBuilder {
      * @param dba Needed to access the database.
      * @return The finished answer.
      */
-    public String getAnswer(int qID, Query query, ItemCard actor, List<ItemCard> items, DatabaseAccessor dba) {
+    public String getAnswer(int qID, Query query) {
         try {
             String cannedPhrase = dba.getCannedPhrase(qID);
-
             String action = query.action;
+            ItemCard actor = dba.getItemCard(query.actor);
+            ItemCard item = dba.getItemCard(query.object);
 
-            Pattern phP = Pattern.compile("(?<=%)[\\w&]*(?=%)");
+
+            LinkedList<String> replacements = new LinkedList<String>();
+            String answer = "";
+
+            Pattern phP = Pattern.compile("%[\\w&]*%");
             Matcher phM = phP.matcher(cannedPhrase);
 
             while (phM.find()) {
                 String group = phM.group();
-                
-                Pattern sphP = Pattern.compile("[\\w]*");
+                Pattern sphP = Pattern.compile("[\\w]+");
                 Matcher sphM = sphP.matcher(group);
                 String replacement = "";
+                sphM.find();
                 String object = sphM.group();
                 //If the object is an action, perform action-related formatting
-                if (object.equals("action")){
+                if (object.equals("action")) {
+                    sphM.find();
                     char grammar = sphM.group().charAt(0);
-                    replacement = buildAction(action,grammar);
-                } 
-                //If the object is an actor, check which field is requested and do the corresponding formatting.
-                else if (object.equals("actor")){
+
+                    replacement = buildAction(action, grammar);
+                } //If the object is an actor, check which field is requested and do the corresponding formatting.
+                else if (object.equals("actor")) {
+
+                    sphM.find();
                     String objectField = sphM.group();
+
+                    sphM.find();
                     char grammar = sphM.group().charAt(0);
-                    
-                    if (objectField.equals("name"))
-                        replacement = readName(actor,grammar);
-                    else if (objectField.equals("buildsAt"))
-                        replacement = readBuildsAt(actor,grammar);
-                    else if (objectField.equals("techTree"))
+
+                    if (objectField.equals("name")) {
+                        replacement = readName(actor, grammar);
+                    } else if (objectField.equals("buildsAt")) {
+                        replacement = readBuildsAt(actor, grammar);
+                    } else if (objectField.equals("techTree")) {
                         replacement = readTechTree(actor, grammar);
+                    }
                     //etc. One elif for every field in the itemCard. Not very pretty. Better way to do this?
                     /*Fields remaining: type, builtBy, size, counter, 
                      * strongAgainst, buildTime, health, armour, food, 
                      * mineralCost, gasCos, tier
                      */
-                }
-                //Like actor, but checks which entries in the list 'items' to use.
-                else if (object.equals("object")){
+                } //Like actor, but checks which entries in the list 'items' to use.
+                else if (object.equals("object")) {
                     /*TODO: 
                      * if first match after "object" is "all", then loop through items.
                      * otherwise, if given a digit, use items.get(digit).
@@ -78,55 +101,61 @@ public class AnswerBuilder {
                      */
                     String objectField = sphM.group();
                     char grammar = sphM.group().charAt(0);
-                    
-                    if (objectField.equals("name"))
-                        replacement = readName(actor,grammar);
-                    else if (objectField.equals("buildsAt"))
-                        replacement = readBuildsAt(actor,grammar);
-                    else if (objectField.equals("techTree"))
-                        replacement = readTechTree(actor, grammar);
+
+                    if (objectField.equals("name")) {
+                        replacement = readName(item, grammar);
+                    } else if (objectField.equals("buildsAt")) {
+                        replacement = readBuildsAt(item, grammar);
+                    } else if (objectField.equals("techTree")) {
+                        replacement = readTechTree(item, grammar);
+                    }
                 }
-                phM.reset();
-                phM.replaceFirst(replacement);
+                replacements.add(replacement);
             }
-
-            readName(actor, 'a');
-            return null;
-
+            phM.reset();
+            for (int i = 0; i < replacements.size(); i++) {
+                answer = phM.replaceFirst(replacements.get(i));
+                phM.reset(answer);
+            }
+            return answer;
         } catch (SQLite.Exception sqle) {
             sqle.printStackTrace();
+        } catch (IOException dbE) {
+            dbE.printStackTrace();
         } catch (ItemCardException ice) {
             //Print to log or something.
             return "Don't know. I'll ask an expert, ask again later.";
-
-        };
+        }
         return null;
     }
+
     /**
      * 
      * @param action
      * @param grammar
      * @return 
      */
-    private String buildAction(String action, char grammar){
-        if(grammar=='p')
+    private String buildAction(String action, char grammar) {
+        if (grammar == 'p') {
             return GrammarEngine.verbPastTense(action);
-        else
+        } else {
             return action;
+        }
     }
-    
+
     private String readName(ItemCard item, char grammar) throws ItemCardException {
         if (item.name == null) {
             throw new ItemCardException("name", item);
         }
 
         String name = item.name;
-        if (grammar == 'i')
+        if (grammar == 'i') {
             return GrammarEngine.nounIndefinite(name);
-        else if (grammar == 'p')
+        } else if (grammar == 'p') {
             return GrammarEngine.nounPlural(name);
-        else
+        } else {
             return name;
+        }
     }
 
     private String readBuildsAt(ItemCard item, char grammar) throws ItemCardException {
