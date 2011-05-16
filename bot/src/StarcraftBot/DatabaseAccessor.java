@@ -29,7 +29,7 @@ public class DatabaseAccessor implements SQLite.Trace, SQLite.Profile {
     private String[] querySchema = new String[] {"id integer primary key", "question text", "action text","actor integer", "object text", "queryId integer"};
     private String[] responseSchema = new String[] {"id integer primary key", "queryId integer", "cPhrase text"};
     private String[] schema = new String[] {"id integer primary key", "name text", cardColumn+" blob"}; // for the unit cards with info
-    private String[] learningSchema = new String[] {"id integer primary key", "newNouns text"};
+    private String[] learningSchema = new String[] {"id integer primary key", "newNoun text", "query blob"};
     
     // insert finder strins:
     String blobCols = Tools.parseColumns(schema);//"id, name, type, "+ cardColumn;
@@ -144,12 +144,33 @@ public class DatabaseAccessor implements SQLite.Trace, SQLite.Profile {
             writer.close();
 
     }
-    public int write(ItemCard card) throws DatabaseException,IOException {
+    public int write(String unknownNoun, Query query) throws DatabaseException {
+        try{
+            // no check for whether query exists. no time to handle now.
+            
+            this.lineCount = do_countRows(unitsTable)+1;
+            String id = Integer.toString(lineCount); // what should this be?
+            
+            // Add row with empty blob (no row number ... )
+            String[] vals = new String[] {id, unknownNoun};
+            do_exec(db, "insert into "+unknownDB+"("+Tools.parseColumns(learningSchema) +") values("+Tools.mergeValues(vals)+", zeroblob("+blobSize+"))");
+
+            // ID is currently set to 1 more than # of rows.
+            writeBlob(unitsTable, cardColumn, lineCount, query);
+        } catch(SQLite.Exception e){
+            System.err.println("Couldn't write Query blob to database!");
+            System.err.println(e.getMessage());
+        } catch(IOException e){
+            System.err.println("Couldn't write Query blob to database!");
+            System.err.println(e.getMessage());
+        }
+        return lineCount;
+    }
+    public int write(ItemCard card) throws DatabaseException {
         try{
             if (getRowNumbers("name: "+card.name).length != 0)
                 throw new DatabaseException("Card Already Exists in database. Use update() instead.");
 
-            // ID is currently set to 1 more than # of rows.
             this.lineCount = do_countRows(unitsTable)+1;
             String id = Integer.toString(lineCount); // what should this be?
             
@@ -157,24 +178,31 @@ public class DatabaseAccessor implements SQLite.Trace, SQLite.Profile {
             String[] vals = new String[] {id, card.name};
             do_exec(db, "insert into "+unitsTable+"("+blobCols+") values("+Tools.mergeValues(vals)+", zeroblob("+blobSize+"))");
 
-            
-            // get blob output stream 
-            Blob writer = db.open_blob("main", unitsTable, cardColumn, lineCount, true);
-
-            OutputStream writeStream = writer.getOutputStream();
-            byte[] sCard = Tools.Serialise(card);
-            writeStream.write(sCard);
-            writeStream.close();
-            writer.close();
+            // ID is currently set to 1 more than # of rows.
+            writeBlob(unitsTable, cardColumn, lineCount, card);
             
         }
         catch(SQLite.Exception e){
             System.err.println("Couldn't write card to database.");
             System.err.println(e.getMessage());
             e.printStackTrace();
+        } catch(IOException e){
+            System.err.println("Couldn't write card to database.");
+            System.err.println(e.getMessage());
         }
         return lineCount;
         
+    }
+    private void writeBlob(String tableName, String column, int lineCount, Object obj) throws SQLite.Exception, IOException{
+            
+            // get blob output stream 
+            Blob writer = db.open_blob("main", tableName, column, lineCount, true);
+
+            OutputStream writeStream = writer.getOutputStream();
+            byte[] serialisedObj = Tools.Serialise(obj);
+            writeStream.write(serialisedObj);
+            writeStream.close();
+            writer.close();
     }
     private int write(String tablename, String... strPairs) throws SQLite.Exception{
 
@@ -204,6 +232,18 @@ public class DatabaseAccessor implements SQLite.Trace, SQLite.Profile {
         return atRow;
     }
 
+    public int handleUnknownQuery(Query query){
+        int row=0;
+        try {
+            // write to unknownDB
+            row = write(query.object, query);
+            
+            // do other things..?
+        } catch (DatabaseException ex) {
+            Logger.getLogger(DatabaseAccessor.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return row;
+    }
     public long addQuery(String question, ArrayList<String> members, Response response) throws DatabaseException {
         // version with the response-object writing to canned phrases in database.
         // this is so that more than one canned phrase can be added at once.
