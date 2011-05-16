@@ -2,11 +2,19 @@
 # a tab separated list of keywords and tags for word tagging.
 # Hand coded or appended to!
 
-marine	unit
-zergling	unit
-barracks	building
-counter	action
-build	action
-why	question
-how	question
-when	question
+Q-why
+Q-how-in which manner-is it possible to
+Q-where-which building-what building
+Q-when
+Q-who-what unit 
+Q-what
+A-build-construct-produce
+A-counter-defeat-works well against
+U-marine
+U-zergling
+U-firebat
+U-hydralisk
+B-barracks
+B-Spawning pool
+
+
