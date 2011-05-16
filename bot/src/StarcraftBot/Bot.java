@@ -24,6 +24,9 @@ public class Bot {
         DatabaseAccessor dba = new DatabaseAccessor();
         DbTests.test2(dba);
         DbTests.testAdders(dba);
+        
+        AnswerBuilder ab = new AnswerBuilder(dba);
+        QuestionBuilder qb = new QuestionBuilder(dba); 
 
         // Run program
         int exitcode = 0;
@@ -55,8 +58,13 @@ public class Bot {
                     // do some interpretation:
                     Interpreter Jeeves = new Interpreter();
                     Query q = Jeeves.interpretTags(tags, inputs);
+                    
                     // String answer = Jeeves.getReply(q); // old file read method
-                    answer = Jeeves.getReply(q, dba);
+                    //String answer = Jeeves.getReply(q, dba);
+                    
+                    //New shiny getAnswer method.
+                    String answer = ab.getAnswer(qb.getQID(q), q);
+
                     System.out.println(Jeeves.name + ": " + answer);
                 } catch (DatabaseException dbe) {
                     System.out.println("DEBUG: Exception in main!");

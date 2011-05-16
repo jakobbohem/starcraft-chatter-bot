@@ -87,7 +87,7 @@ public class AnswerBuilder {
                         replacement = readTechTree(actor, grammar);
                     }
                     //etc. One elif for every field in the itemCard. Not very pretty. Better way to do this?
-                    /*Fields remaining: type, builtBy, size, counter, 
+                    /*Fields remaining: counter, 
                      * strongAgainst, buildTime, health, armour, food, 
                      * mineralCost, gasCos, tier
                      */
@@ -158,6 +158,27 @@ public class AnswerBuilder {
         }
     }
 
+    private String readType(ItemCard item, char grammar) throws ItemCardException {
+        if (item.type == null) {
+            throw new ItemCardException("type", item);
+        }
+        return item.type;
+    }
+
+    private String readSize(ItemCard item, char grammar) throws ItemCardException {
+        if (item.size == null) {
+            throw new ItemCardException("size", item);
+        }
+        return item.size;
+    }
+
+    private String readCounter(ItemCard item, char grammar) throws ItemCardException {
+        if (item.counter == null) {
+            throw new ItemCardException("counter", item);
+        }
+        return null;
+    }
+
     private String readBuildsAt(ItemCard item, char grammar) throws ItemCardException {
         if (item.buildsAt == null) {
             throw new ItemCardException("BuildsAt", item);
@@ -171,6 +192,21 @@ public class AnswerBuilder {
             buildsAt = GrammarEngine.nounPlural(buildsAt);
         }
         return buildsAt;
+    }
+
+    private String readBuiltBy(ItemCard item, char grammar) throws ItemCardException {
+        if (item.builtBy == null) {
+            throw new ItemCardException("builtBy", item);
+        }
+
+        String builtBy = item.builtBy;
+
+        if (grammar == 'i') {
+            builtBy = GrammarEngine.nounIndefinite(builtBy);
+        } else if (grammar == 'p') {
+            builtBy = GrammarEngine.nounPlural(builtBy);
+        }
+        return builtBy;
     }
 
     private String readTechTree(ItemCard item, char grammar) throws ItemCardException {

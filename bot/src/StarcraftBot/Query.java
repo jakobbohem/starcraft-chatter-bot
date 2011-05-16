@@ -46,7 +46,7 @@ public class Query {
         else return true;
     }
     public boolean checkNotNull(){
-        if (action == null || object == null)
+        if (action == null || object == null || question == null)
             return false;
         else return true;
     }
