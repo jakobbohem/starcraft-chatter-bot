@@ -89,7 +89,7 @@ public class DatabaseAccessor implements SQLite.Trace, SQLite.Profile {
 	    
             }
             catch(SQLite.Exception ee){
-                System.out.println("[INFO: "+ee.getMessage()+"]");
+                //System.out.println("[INFO: "+ee.getMessage()+"]");
             }
     }
     
