@@ -22,6 +22,14 @@ public class DbTests {
      *
      * @param dba
      */
+    public static void createSingleMarineDB(String dbfile) throws DatabaseException, SQLite.Exception {
+        DatabaseAccessor dba = new DatabaseAccessor(dbfile);
+        dba.deleteTable("units");
+        dba.tryCreateDefaultTables();
+        ItemCard c = new ItemCard("MAKE_");
+        int row = dba.write(c);
+        dba.close();
+    }
     public static void test2(DatabaseAccessor dba){
         try {
             try {

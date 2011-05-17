@@ -20,22 +20,24 @@ public class Bot {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-
+        try {
         // Run basic database implementation test:
+        //DbTests.createSingleMarineDB("corpus/database");
         DatabaseAccessor dba = new DatabaseAccessor();
+        
 //        DbTests.test2(dba);
 //        DbTests.testAdders(dba);
 
         // Run program
         int exitcode = 0;
         Scanner scan = new Scanner(System.in);
-        try {
+        
             
         AnswerBuilder ab = new AnswerBuilder(dba);
         QuestionBuilder qb = new QuestionBuilder(dba); 
-        
+        System.out.println("Enter a phrase for tagging: \n(1 to exit)");
             while (exitcode != 1) {
-                System.out.println("Enter a phrase for tagging: \n(1 to exit)");
+                
                 System.out.print("User: ");
                 String inp = scan.nextLine();
 
