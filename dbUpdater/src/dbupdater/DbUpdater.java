@@ -3,7 +3,9 @@
  * and open the template in the editor.
  */
 package dbupdater;
+import SQLite.Exception;
 import StarcraftBot.*;
+import StarcraftBot.DatabaseAccessor.DatabaseException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Scanner;
@@ -55,7 +57,7 @@ public class DbUpdater {
         System.out.println(" - Running interactive add-to-database program -");
 
     }
-    private static void extendDB_poc() throws IOException {
+    private static void extendDB_poc() throws IOException, DatabaseException, IllegalArgumentException, Exception, ItemCardException {
         
         String queryWithoutAnswer = "how do I counter zerglings with marines";
         String databaseFile = "../bot/corpus/database";

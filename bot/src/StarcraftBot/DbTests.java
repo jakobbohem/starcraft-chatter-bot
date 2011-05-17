@@ -27,7 +27,7 @@ public class DbTests {
             try {
                 //  Test saving an object to database
                 //dba.debug(); // this isn't needed, but gives output of database queries.
-                ItemCard marineCard = new ItemCard("marine");
+                ItemCard marineCard = new ItemCard("MAKE_");
                 Tools.printCard(marineCard);
                 int rownumber = dba.write(marineCard); // this throws!
                 dba.delete(rownumber);

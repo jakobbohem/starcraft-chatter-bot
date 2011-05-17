@@ -44,14 +44,12 @@ public class ItemCard implements Serializable {
         this.type=itemType;
         this.name=name;
     }
-    public ItemCard(String unitType) {
-        try {
+    public ItemCard(String name) {
             // just create a simple unit (marine) for now. then read from database.
                 
-            
-                if("marine".equals(unitType.toLowerCase()))
+                if("MAKE_".equals(name))
                 {
-                    String name = "marine";
+                    name = "marine";
                     type="unit";
                     size = "light";
                     tier=1;
@@ -81,13 +79,20 @@ public class ItemCard implements Serializable {
                     //upgrades[0] = new Addon("U-238 shells", this.name, "Academy");
 
                 }
-                else throw new Exception("couldn't find match for unit type '"+unitType+"'. try again.");
-        } catch (Exception ex) {
-            Logger.getLogger(ItemCard.class.getName()).log(Level.SEVERE, null, ex);
-        }
+                else {
+                    this.name=name;
+                }
         
     
     }
+    /**
+     * 
+     * 
+     * Changed to be able to update 'type' as well - this is needed for the new 
+     * way of creating ItemCards that is used in the onlineUpdater.
+     * @param arguments
+     * @throws ItemCardException 
+     */
     public void update(String... arguments) throws ItemCardException {
         for (int i = 0;i<arguments.length;i++){
             // note switching 'string' arguments is coming first in JDK 7
@@ -101,6 +106,8 @@ public class ItemCard implements Serializable {
             // going through the fields of ItemCard
             if(key.toLowerCase().equals("name"))
                 this.name = value;
+            else if(key.toLowerCase().equals("type"))
+                this.type = value;
             else if(key.toLowerCase().equals("size"))
                 this.size = value;
             else if(key.toLowerCase().equals("tier"))
@@ -149,7 +156,7 @@ public class ItemCard implements Serializable {
                 else
                     throw new ItemCardException("builtBy only applies to building.");
             }
-            else throw new ItemCardException("Couldn't interpret input string"+arguments[i]);
+            else throw new ItemCardException("Couldn't interpret input string: '"+arguments[i]+"'");
                      
                         
         }

@@ -1,0 +1,137 @@
+# list of liquipedia items for itemcard!
+Probe
+Pylon
+Marine
+Zealot
+Dragoon
+High Templar
+Dark Templar
+From Robotics Facility
+Reaver
+Fusion
+Archon
+Dark Archon
+Air Units
+From Robotics Facility
+Observer
+Shuttle
+From Stargate
+Scout
+Carrier
+Interceptor
+Arbiter
+Corsair
+Buildings
+Basic
+Nexus
+Pylon
+Assimilator
+Gateway
+Forge
+Shield Battery
+Cybernetics Core
+Photon Cannon
+Advanced
+Robotics Facility
+Stargate
+Citadel of Adun
+Robotics Support Bay
+Fleet Beacon
+Templar Archives
+Observatory
+Arbiter Tribunal
+ Terran Units ( · )
+
+Units
+Ground Units
+From Command Center
+SCV
+From Barracks
+Marine
+Firebat
+Medic
+Ghost
+From Factory
+Vulture
+Spider Mine
+Siege Tank
+Goliath
+Air Units
+From Starport
+Wraith
+Dropship
+Science Vessel
+Battlecruiser
+Valkyrie
+Buildings
+Basic
+Command Center
+Comsat Station
+Nuclear Silo
+Supply Depot
+Refinery
+Barracks
+Engineering Bay
+Bunker
+Academy
+Missile Turret
+Advanced
+Factory
+Machine Shop
+Starport
+Control Tower
+Armory
+Science Facility
+Physics Lab
+Covert Ops
+ Zerg Units ( · )
+
+Units
+Ground Units
+Hatchery
+Larva
+Egg
+Drone
+Zergling
+Hydralisk
+Lair
+Lurker
+Lurker Egg
+Hive
+Ultralisk
+Defiler
+From Infested Command Center
+Infested Terran
+Special
+Broodling
+Air Units
+Hatchery
+Overlord
+Lair
+Mutalisk
+Cocoon
+Scourge
+Queen
+Hive
+Guardian
+Devourer
+Buildings
+Hatchery
+Hatchery
+Creep Colony
+Sunken Colony
+Spore Colony
+Extractor
+Spawning Pool
+Evolution Chamber
+Hydralisk Den
+Lair
+Lair
+Spire
+Queen's Nest
+Hive
+Hive
+Greater Spire
+Nydus Canal
+Ultralisk Cavern
+Defiler Mound

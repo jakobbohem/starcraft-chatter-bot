@@ -1,0 +1,4 @@
+# list of liquipedia items for itemcard!
+Probe
+Pylon
+High_Templar
