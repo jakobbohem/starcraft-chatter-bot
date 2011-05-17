@@ -1,4 +1,6 @@
 # list of liquipedia items for itemcard!
+Zergling
+Marine
 Probe
 Pylon
 High_Templar
