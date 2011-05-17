@@ -56,19 +56,8 @@ public class AnswerBuilder {
             String action = query.action;
 
             ItemCard actor, item;
-
-            if (query.actorNotNull()) {
-                actor = dba.getItemCard(query.actor);
-            } else 
-                actor = new ItemCard(null);
-            
-            if (query.objectNotNull()) {
-                item = dba.getItemCard(query.object);
-            } else
-                item = new ItemCard(null);
-
-
-
+            boolean actorSet = false;
+            boolean itemSet = false;
             LinkedList<String> replacements = new LinkedList<String>();
             String answer = "";
 
@@ -90,7 +79,11 @@ public class AnswerBuilder {
                     replacement = buildAction(action, grammar);
                 } //If the object is an actor, check which field is requested and do the corresponding formatting.
                 else if (objectType.equals("actor")) {
-                    if (!query.actorNotNull())
+                    if (query.actorNotNull() && actorSet==false){
+                        actor = dba.getItemCard(query.actor);
+                        actorSet = true;
+                    }
+                    else
                         throw new IOException("Need actor. No Actor.");
 
                     sphM.find();
@@ -118,7 +111,11 @@ public class AnswerBuilder {
                      */
                 } //Like actor, but checks which entries in the list 'items' to use.
                 else if (objectType.equals("object")) {
-                    if (!query.objectNotNull())
+                    if (query.objectNotNull() && itemSet==false) {
+                        item = dba.getItemCard(query.object);
+                        itemSet = true;
+                    }
+                    else
                         throw new IOException("Need object. No object.");
                     
                     /*TODO: 
