@@ -165,7 +165,7 @@ public class AnswerBuilder {
                     boolean isIn = false;
                     
                     if (objectField.equals("counter")) {
-                         isIn = isInCounter(actor,item);
+                        isIn = isInCounter(actor,item);
                     } else if (objectField.equals("buildsAt")) {
                         //isIn = isInBuildsAt(actor,item);
                     } else if (objectField.equals("builtBy")) {
