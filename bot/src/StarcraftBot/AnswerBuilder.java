@@ -319,7 +319,7 @@ public class AnswerBuilder {
                 returnStr += String.format(", %s",
                         geNoun(counter[i],grammar));
             }
-            returnStr = returnStr += String.format("and %s",
+            returnStr = returnStr += String.format(" and %s",
                     geNoun(counter[counter.length-1],grammar));
             return returnStr;
         }
@@ -347,7 +347,7 @@ public class AnswerBuilder {
             return String.format("%s",
                     geNoun(upgradeAt[0],grammar));
         } else if (upgradeAt.length == 2) {
-            return String.format("%s and %s",
+            return String.format("%s or %s",
                     geNoun(upgradeAt[0],grammar),
                     geNoun(upgradeAt[1],grammar));
         } else {
@@ -357,7 +357,7 @@ public class AnswerBuilder {
                 returnStr += String.format(", %s",
                         geNoun(upgradeAt[i],grammar));
             }
-            returnStr = returnStr += String.format("and %s",
+            returnStr = returnStr += String.format(" or %s",
                     geNoun(upgradeAt[upgradeAt.length-1],grammar));
             return returnStr;
         }
@@ -444,7 +444,7 @@ public class AnswerBuilder {
                 returnStr += String.format(", %s",
                         GrammarEngine.nounIndefinite(techItem));
             }
-            returnStr = returnStr += String.format("and %s",
+            returnStr = returnStr += String.format(" and %s",
                     GrammarEngine.nounIndefinite(ttl.get(0)));
             return returnStr;
         }
@@ -482,5 +482,9 @@ public class AnswerBuilder {
             return GrammarEngine.nounIndefinite(noun);
         else
             return noun;
+    }
+    
+    public String testMethod(ItemCard icTest) throws ItemCardException{
+        return readUpgradeAt(icTest, 'i');
     }
 }
