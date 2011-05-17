@@ -148,6 +148,8 @@ public class AnswerBuilder {
                 answer = phM.replaceFirst(replacements.get(i));
                 phM.reset(answer);
             }
+            if(answer.equals(""))
+                answer = "DEBUG: Answer empty. Need canned phrase";
             return answer;
         } catch (SQLite.Exception sqle) {
             System.out.print("SQLite error in 'AnswerBuilder'.");
@@ -158,7 +160,7 @@ public class AnswerBuilder {
             dba.handleUnknownQuery(ice.toString(),ice.getProblems(),query);
             return "Don't know. I'll ask an expert, ask again later.";
         }
-        return null;
+        return "";
     }
 
     /**
@@ -239,7 +241,29 @@ public class AnswerBuilder {
         if (item.counter == null) {
             throw new ItemCardException("missing field",new String[]{"counter"});
         }
-        return null;
+        
+        String[] counter = item.counter;
+        
+        if (counter.length==0) {
+            throw new ItemCardException("empty field",new String[]{"counter"});
+        } else if (counter.length == 1) {
+            return String.format("%s",
+                    geNoun(counter[0],grammar));
+        } else if (counter.length == 2) {
+            return String.format("%s and %s",
+                    geNoun(counter[0],grammar),
+                    geNoun(counter[1],grammar));
+        } else {
+            String returnStr = returnStr = String.format("%s",
+                    geNoun(counter[0],grammar));
+            for (int i = 1; i < counter.length - 1; i++) {
+                returnStr += String.format(", %s",
+                        geNoun(counter[i],grammar));
+            }
+            returnStr = returnStr += String.format("and %s",
+                    geNoun(counter[counter.length-1],grammar));
+            return returnStr;
+        }
     }
 
     /**
@@ -327,5 +351,14 @@ public class AnswerBuilder {
                     GrammarEngine.nounIndefinite(ttl.get(0)));
             return returnStr;
         }
+    }
+    
+    private String geNoun(String noun, char grammar){
+        if(grammar=='p')
+            return GrammarEngine.nounPlural(noun);
+        else if(grammar=='i')
+            return GrammarEngine.nounIndefinite(noun);
+        else
+            return noun;
     }
 }
