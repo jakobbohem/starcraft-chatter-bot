@@ -21,37 +21,37 @@ public class Query {
     public boolean isPlural;
     
     // constr
-    Query(String action, String question, String target, String actor){ // simple String[] constructor:
+    Query(String action, String question, String object, String actor){ // simple String[] constructor:
         // neglecting setting objectStrings for now.    
         this.action=action;
         this.actor=actor;
-        this.object=target;
+        this.object=object;
         this.question=question;
     }
-    Query(String action, String target) { // 2 param overload
+    Query(String action, String object) { // 2 param overload
         this.action=action;
-        this.object=target;
+        this.object=object;
     }
-    Query(String action, String target, String question) { // 2 param overload
+    Query(String action, String object, String question) { // 2 param overload
         this.question = question;
         this.action = action;
         // super simple plural check:
-        this.object = target.endsWith("s") ? target.substring(0, target.length()-1): target;
+        this.object = object.endsWith("s") ? object.substring(0, object.length()-1): object;
     }
     
     // public methods
     public boolean baseCheckNotNull(){
-        if (action == null || objectNotNull())
+        if (action == null || object == null)
             return false;
         else return true;
     }
     public boolean checkNotNull(){
-        if (action == null || objectNotNull() || question == null)
+        if (action == null || object == null || question == null)
             return false;
         else return true;
     }
     public boolean hardCheckNotNull(){
-        if (action == null || question == null || objectNotNull() || actorNotNull())
+        if (action == null || question == null || object == null || actor == null)
             return false;
         else return true;
     }
@@ -78,14 +78,14 @@ public class Query {
         else return new String[] {""};
     }
     
-    public String[] buildSearchPhrase() {
+    public String[] buildSearchPhrase() throws Exception {
         if(hardCheckNotNull())
             return new String[] {"action:"+action, "question:"+question, "object:"+object, "actor:"+actor};
         else if(checkNotNull())
             return new String[] {"question:"+question, "action:"+action, "object:"+object};
         else if(baseCheckNotNull())
             return new String[] {"action:"+action, "object:"+object};
-        else return new String[] {""};
+        throw new java.lang.Exception("Not enough labels!");
     }
 
     // setter methods:

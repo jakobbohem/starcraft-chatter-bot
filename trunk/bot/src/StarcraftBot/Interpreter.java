@@ -160,7 +160,8 @@ public class Interpreter {
         }
         else if(question == null && action != null && strobject != null)
         {
-            System.out.println("So you would like to know how, why, when or where to " + action + " " + strobject + "s?");
+            //System.out.println("So you would like to know how, why, when or where to " + action + " " + strobject + "s?");
+            return query = new Query( action, strobject,"how");
         }
         else if(question != null && action == null && strobject != null)
         {

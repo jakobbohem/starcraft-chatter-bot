@@ -25,14 +25,15 @@ public class Bot {
         DatabaseAccessor dba = new DatabaseAccessor();
         DbTests.test2(dba);
         DbTests.testAdders(dba);
-        
-        AnswerBuilder ab = new AnswerBuilder(dba);
-        QuestionBuilder qb = new QuestionBuilder(dba); 
 
         // Run program
         int exitcode = 0;
         Scanner scan = new Scanner(System.in);
         try {
+            
+        AnswerBuilder ab = new AnswerBuilder(dba);
+        QuestionBuilder qb = new QuestionBuilder(dba); 
+        
             while (exitcode != 1) {
                 System.out.println("Enter a phrase for tagging: \n(1 to exit)");
                 System.out.print("User: ");
@@ -54,19 +55,19 @@ public class Bot {
                     // equal to getLastChunks
 
                     ArrayList<ArrayList> tags = tagger.getTagList();
-                    Tools.printArray(tagger.getLastChunks());
+                    //Tools.printArray(tagger.getLastChunks());
                     //Tools.printArray(tags);
-                    Query q = new Query(null,null);
+                    
                     // do some interpretation:
                     
-                    q = Jeeves.interpretTags(tags, inp, exitcode);
+                    Query q = Jeeves.interpretTags(tags, inp, exitcode);
                     
                     // String answer = Jeeves.getReply(q); // old file read method
                     //String answer = Jeeves.getReply(q, dba);
                     
                     //New shiny getAnswer method.
                     if(q == null)
-                       System.exit(0);
+                       throw new Exception("Query object is NULL!");
                     answer = ab.getAnswer(qb.getQID(q), q);
 
                     

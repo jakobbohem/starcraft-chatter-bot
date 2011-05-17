@@ -57,7 +57,7 @@ public class Tagger {
             
     }
     
-    public String[] getTagsFromDatabase() throws ExecutionOrderException, IOException {// returns tags, use presaved vars
+        public String[] getTagsFromDatabase() throws ExecutionOrderException, IOException {// returns tags, use presaved vars
         
         // - - - - - -
         createDatabase(); // recreate on each call for now.
