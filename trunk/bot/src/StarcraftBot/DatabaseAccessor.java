@@ -84,7 +84,7 @@ public class DatabaseAccessor implements SQLite.Trace, SQLite.Profile {
 	    
             }
             catch(SQLite.Exception ee){
-                System.out.println("["+ee.getMessage()+"]");
+                //System.out.println("["+ee.getMessage()+"]");
             }
     }
     
@@ -107,12 +107,12 @@ public class DatabaseAccessor implements SQLite.Trace, SQLite.Profile {
             Logger.getLogger(DatabaseAccessor.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-    public int updateItemCard(String cardName, String... fields) throws DatabaseException, IllegalArgumentException, IOException {
+    public int updateItemCard(String cardName, String... fields) throws DatabaseException, IllegalArgumentException, IOException, SQLite.Exception, ItemCardException {
         int row=0;
-        try{
-        int[] matches = getRowNumbers("name:marine");//String.format("select * from %s where name='%s'",unitsTable, cardName.toLowerCase()));
+        cardName = cardName.toLowerCase(); // this might be a good idea...
+        int[] matches = getRowNumbers("name:"+cardName);//String.format("select * from %s where name='%s'",unitsTable, cardName.toLowerCase()));
         if (matches.length==0)
-            throw new DatabaseException("Found no match for '"+cardName+"' in database.");
+            throw new DatabaseException("Found no match for '"+cardName+"' in database. Does the card exist?");
 
         if (matches.length > 1)
             System.err.println("WARNING. found more than 1 match. Using 1st occurrence");
@@ -124,14 +124,6 @@ public class DatabaseAccessor implements SQLite.Trace, SQLite.Profile {
 
         // write back to database:
         overwrite(dbCard, row);
-        }
-        catch(SQLite.Exception e){
-            System.err.println("Error when writing to database");
-            System.err.println(e.getMessage());
-        } catch(ItemCardException e){
-            System.err.println("Error when writing to database");
-            System.err.println(e.getMessage());
-        }
         return row;
     }
     /** Writes an itemCard to the ItemCard database table with the name and a unique id.
@@ -339,7 +331,8 @@ public class DatabaseAccessor implements SQLite.Trace, SQLite.Profile {
      * @return
      */
     public ItemCard getItemCard(String name) throws DatabaseException, SQLite.Exception{
-         String query = "select id from "+unitsTable+" where name='"+name.toLowerCase()+"'";
+
+        String query = "select id from "+unitsTable+" where name='"+name.toLowerCase()+"'";
         
         int lineNo = 0; // default
         lineNo = getInt(query); // get return integer from Query ('Count(*)')
@@ -558,17 +551,20 @@ public class DatabaseAccessor implements SQLite.Trace, SQLite.Profile {
         }
         throw new SQLite.Exception("couldn't parse string type");
     }
-    private int getInt(String query) throws SQLite.Exception {
-        
-        Stmt stmt = db.prepare(query);
+    private int getInt(String query) throws SQLite.Exception{
         int outp = 0;
             try{
+                Stmt stmt = db.prepare(query);
                 stmt.step();
                 for (int i = 0;i<stmt.column_count();i++)
                     outp = Integer.parseInt(stmt.column_string(i));
             } catch(NumberFormatException ee){
                 System.err.println("Couldn't parse Integer");
-                // couldn't parse this int...
+            } catch(SQLite.Exception e) {// this seems to happen if no rows are returned...
+                System.err.println("Cause: "+e.getCause());
+                if("column out of bounds".equalsIgnoreCase(e.getMessage()))
+                    return 0;
+                else throw e;
             }
         
         return outp; // should return parsed number of rows!
