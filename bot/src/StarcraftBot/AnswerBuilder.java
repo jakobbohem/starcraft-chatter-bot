@@ -43,12 +43,23 @@ public class AnswerBuilder {
      * @param dba Needed to access the database.
      * @return The finished answer.
      */
-    public String getAnswer(int qID, Query query) {
+    public String getAnswer(int qID, Query query) throws IOException {
         try {
             String cannedPhrase = dba.getCannedPhrase(qID);
             String action = query.action;
-            ItemCard actor = dba.getItemCard(query.actor);
-            ItemCard item = dba.getItemCard(query.object);
+
+            ItemCard actor, item;
+
+            if (query.actorNotNull()) {
+                actor = dba.getItemCard(query.actor);
+            } else 
+                actor = new ItemCard(null);
+            
+            if (query.objectNotNull()) {
+                item = dba.getItemCard(query.object);
+            } else
+                item = new ItemCard(null);
+
 
 
             LinkedList<String> replacements = new LinkedList<String>();
@@ -63,15 +74,17 @@ public class AnswerBuilder {
                 Matcher sphM = sphP.matcher(group);
                 String replacement = "";
                 sphM.find();
-                String object = sphM.group();
+                String objectType = sphM.group();
                 //If the object is an action, perform action-related formatting
-                if (object.equals("action")) {
+                if (objectType.equals("action")) {
                     sphM.find();
                     char grammar = sphM.group().charAt(0);
 
                     replacement = buildAction(action, grammar);
                 } //If the object is an actor, check which field is requested and do the corresponding formatting.
-                else if (object.equals("actor")) {
+                else if (objectType.equals("actor")) {
+                    if (!query.actorNotNull())
+                        throw new IOException("Need actor. No Actor.");
 
                     sphM.find();
                     String objectField = sphM.group();
@@ -92,7 +105,10 @@ public class AnswerBuilder {
                      * mineralCost, gasCos, tier
                      */
                 } //Like actor, but checks which entries in the list 'items' to use.
-                else if (object.equals("object")) {
+                else if (objectType.equals("object")) {
+                    if (!query.objectNotNull())
+                        throw new IOException("Need object. No object.");
+                    
                     /*TODO: 
                      * if first match after "object" is "all", then loop through items.
                      * otherwise, if given a digit, use items.get(digit).
