@@ -137,12 +137,12 @@ public class HTMLParser {
             DatabaseAccessor dba = new DatabaseAccessor(dbFile);
             // update each of the cards, creating them if they don't exist!
             ArrayList<String> updates = getItemCardUpdates(endings[i]);
-            String name = updates.get(updates.size()-1).split(":")[1].trim(); // assumes that name is last entry!
+            String name = updates.get(updates.size()-1).split(":")[1].trim().toLowerCase(); // assumes that name is last entry!
             try{
                 ItemCard c = dba.getItemCard(name);
                 System.out.println("Found existing item card: "+c.name);
             } catch(DatabaseException e){
-                // card wasn't found: create it!
+                System.out.println("card wasn't found: create it!");
                 dba.write(new ItemCard(name)); // should take name and not type - this sets type to "name" right now...
             }
             try{
@@ -207,7 +207,7 @@ public class HTMLParser {
 
         // can also do e.g.: cooldown, range, attack
         boolean setType = false;
-        for (int i = 1;i<blocks.length;i++){
+        for (int i = 0;i<blocks.length;i++){
             if(blocks[i].toLowerCase().endsWith("type"))
             {
                 String[] data = blocks[i+1].split(" ");
@@ -237,7 +237,8 @@ public class HTMLParser {
                     index++;
                 updates.add("health:"+data[index].trim());
                 //updates.add("shield:"+data[1].trim());
-                updates.add("armour:"+data[index+2].trim());
+                index = (index+2 == data.length-1) ? index+1: index+2; // ugly hack for terran.
+                updates.add("armour:"+data[index].trim());
             }
 //            if(blocks[i].equalsIgnoreCase("sight"))
 //            {
