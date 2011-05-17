@@ -173,18 +173,28 @@ public class Interpreter {
         
         }
          //Strings for follow-up questions
-        String[] noAction = new String[]{"You need to tell me what you want to do with " + strobject + "s.",
-        "Ah, " + strobject + "s, gotcha. Now, please let me know what you want to do with it.",
-        "You mention " + strobject + "s. What do you wish to know about " + strobject + "s?"
+        String[] noAction = new String[]{"You need to tell me what you want to do with " + strobject + "s.\n",
+        "Ah, " + strobject + "s, gotcha. Now, please let me know what you want to do with it.\n",
+        "You mention " + strobject + "s. What do you wish to know about " + strobject + "s?\n"
         };
+        String[] onlyAction = new String[]{ "So you want to do some " +  action + "ing, eh? Please elaborate.\n",
+        "You clearly want to " + action + " something. What would you like to " + action + "?\n",
+        "It sure is possible to " + action + " things, but you'll have to be a bit more specific. \n"
+        };
+        String[] repeating = new String[]{"You're repeating yourself and it's not helping! \n",
+        "Saying the same thing over and over won't produce the result you are looking for. \n",
+        "Yes, I believe you just said that. Try entering something else this time. \n"
+        };
+        
         
         // Follow up questions. TODO! Right now the user has to ask
         // a completely new question. Make it so that the follow up is more natural!
         Scanner scan = new Scanner(System.in);
         if(question == null && action != null && strobject == null )
         {
-            System.out.println("You clearly want to " + action + " something. What would you like to " + action + "?\n");
-            question = "who";
+            System.out.println(onlyAction[random.nextInt(3)]);
+            //System.out.println("You clearly want to " + action + " something. What would you like to " + action + "?\n");
+            //question = "who";
         }
         else if(question != null && action == null && strobject == null)
         {
@@ -209,7 +219,7 @@ public class Interpreter {
         in = scan.nextLine();
         while(in.equals(lastinput))
         {
-            System.out.print("You're repeating yourself and it's not helping! \n");
+            System.out.print(repeating[random.nextInt(3)]);
             System.out.println("User: ");
             lastinput = in;
             in = scan.nextLine();
