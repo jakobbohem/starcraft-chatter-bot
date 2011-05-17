@@ -28,14 +28,16 @@ public class DbUpdater {
                 Scanner input = new Scanner(System.in);
                 System.out.println("what would you like to do?");
                 String mode = input.nextLine();
-                if(mode.toLowerCase().equals("extendDB"))
+                if(mode.toLowerCase().equals("extenddb"))
                     extendDB_poc();
                 else if(mode.toLowerCase().equals("addconsole"))
                     runAddConsole();
-                else if(mode.toLowerCase().equals("addcsv"))
+                else if(mode.toLowerCase().equals("addcsv")) //ashwin is writing this program
                     runAddCSV();
+                else if (mode.toLowerCase().equals("html"))
+                    System.out.println("//HTMLParser.run();");
                 else
-                System.out.println(String.format("Mode '%s' not available. Try '','' or ''",mode));
+                System.out.println(String.format("Mode '%s' not available. Try 'extenddb','addconsole' or 'addcsv'",mode));
                 // do nothing
             }
         }// end of try
@@ -54,6 +56,7 @@ public class DbUpdater {
 
     }
     private static void extendDB_poc() throws IOException {
+        
         String queryWithoutAnswer = "how do I counter zerglings with marines";
         String databaseFile = "../bot/corpus/database";
 
