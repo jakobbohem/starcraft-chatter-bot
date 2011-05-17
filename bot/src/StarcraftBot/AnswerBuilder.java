@@ -288,12 +288,12 @@ public class AnswerBuilder {
     }
 
     /**
-     * Reads the type field. Checks if it's there (if not, throw exception). 
-     * This field needs to be formatted - the counters field is an array of stuff.
-     * Probably needs to be grammarised as well.
+     * Reads the counter field. Checks if it's there (if not, throw exception). 
+     * Returns a properly formatted list, like "a, b, c and d", grammarised using
+     * 'grammar'.
      * @param item Contains the field.
-     * @param grammar Dummy. There because I couldn't be assed to remove it.
-     * @return Field value.
+     * @param grammar How to grammarise the field.
+     * @return Formatted string.
      * @throws ItemCardException if the field is empty.
      */
     private String readCounter(ItemCard item, char grammar) throws ItemCardException {
@@ -321,6 +321,44 @@ public class AnswerBuilder {
             }
             returnStr = returnStr += String.format("and %s",
                     geNoun(counter[counter.length-1],grammar));
+            return returnStr;
+        }
+    }
+    
+    /**
+     * Reads the counter field. Checks if it's there (if not, throw exception). 
+     * Returns a properly formatted list, like "a, b, c and d", grammarised using
+     * 'grammar'.
+     * @param item Contains the field.
+     * @param grammar How to grammarise the field.
+     * @return Formatted string.
+     * @throws ItemCardException if the field is empty.
+     */
+    private String readUpgradeAt(ItemCard item, char grammar) throws ItemCardException {
+        if (item.upgradeAt == null) {
+            throw new ItemCardException("missing field",new String[]{"upgrade at"});
+        }
+        
+        String[] upgradeAt = item.upgradeAt;
+        
+        if (upgradeAt.length==0) {
+            throw new ItemCardException("empty field",new String[]{"counter"});
+        } else if (upgradeAt.length == 1) {
+            return String.format("%s",
+                    geNoun(upgradeAt[0],grammar));
+        } else if (upgradeAt.length == 2) {
+            return String.format("%s and %s",
+                    geNoun(upgradeAt[0],grammar),
+                    geNoun(upgradeAt[1],grammar));
+        } else {
+            String returnStr = returnStr = String.format("%s",
+                    geNoun(upgradeAt[0],grammar));
+            for (int i = 1; i < upgradeAt.length - 1; i++) {
+                returnStr += String.format(", %s",
+                        geNoun(upgradeAt[i],grammar));
+            }
+            returnStr = returnStr += String.format("and %s",
+                    geNoun(upgradeAt[upgradeAt.length-1],grammar));
             return returnStr;
         }
     }
