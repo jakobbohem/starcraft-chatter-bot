@@ -75,7 +75,12 @@ public class DatabaseAccessor implements SQLite.Trace, SQLite.Profile {
     }
     
     // High level methods for database manipulation:
-    
+    public void tryCreateDefaultTables() {
+        createTable(unitsTable, this.schema);
+        createTable(qTable, this.querySchema);
+        createTable(rTable, this.responseSchema);
+        createTable(unknownDB, this.learningSchema);
+    }
     private void createTable(String tablename, String[] schema){
         try{
             // create the three tables (unit data, query table, response table)
@@ -84,7 +89,7 @@ public class DatabaseAccessor implements SQLite.Trace, SQLite.Profile {
 	    
             }
             catch(SQLite.Exception ee){
-                //System.out.println("["+ee.getMessage()+"]");
+                System.out.println("[INFO: "+ee.getMessage()+"]");
             }
     }
     
@@ -561,7 +566,7 @@ public class DatabaseAccessor implements SQLite.Trace, SQLite.Profile {
             } catch(NumberFormatException ee){
                 System.err.println("Couldn't parse Integer");
             } catch(SQLite.Exception e) {// this seems to happen if no rows are returned...
-                System.err.println("Cause: "+e.getCause());
+                //System.err.println("Cause: "+e.getCause());
                 if("column out of bounds".equalsIgnoreCase(e.getMessage()))
                     return 0;
                 else throw e;
@@ -582,8 +587,21 @@ public class DatabaseAccessor implements SQLite.Trace, SQLite.Profile {
             boolean accept = Boolean.parseBoolean(r.readLine());
             if(accept)
             {
-                do_exec(db, "drop table "+tablename+"_bkp");
-                createTable(tablename+"_bkp", this.schema);
+                String[] schema = null;
+                if (tablename.equals(unitsTable))
+                    schema = this.schema;
+                else if (tablename.equals(qTable))
+                    schema = querySchema;
+                else if (tablename.equals(rTable))
+                    schema = responseSchema;
+                else if (tablename.equals(unknownDB))
+                    schema = learningSchema;
+                else throw new DatabaseException("no matching schema for table: "+tablename);
+                try{do_exec(db, "drop table "+tablename+"_bkp");}
+                catch(SQLite.Exception e ){// if table isn't there
+                    // do nothing.
+                }
+                createTable(tablename+"_bkp", schema);
                 do_exec(db, "insert into "+tablename+"_bkp select * from "+tablename);
                 do_exec(db, "drop table "+tablename);
             }
