@@ -21,14 +21,14 @@ public class QuestionBuilder {
         defaultQID = dba.getDefaultQID();
     }
     
-    public long getQID(Query q) {
+    public int getQID(Query q) {
         try {
             String[] md = q.buildSearchPhrase();
             return dba.getQid(md);
         }
         //This class could possibly be used to define what keywords to search for to narrow down the search in case of multiple answers.
         catch (Exception ex) {
-            return defaultQID;
+            return (int) defaultQID;
         }
     }
     
