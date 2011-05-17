@@ -8,6 +8,7 @@ import java.util.*;
 import StarcraftBot.DatabaseAccessor.DatabaseException; // for database read/write issues
 import StarcraftBot.Interpreter.SparseSpecException; // for lack of information in input issues
 import StarcraftBot.Tagger.ExecutionOrderException; // general Exception for bad coding issues (CATCH INSIDE?)
+import java.io.IOException; //Thrown by the AnswerBuilder in case there's something wrong with the ItemCards.
 
 /**
  * Testing harmless code submit through Netbeans SVN plugin
@@ -58,7 +59,7 @@ public class Bot {
 
                     // do some interpretation:
                     
-                    Query q = Jeeves.interpretTags(tags, inputs);
+                    Query q = Jeeves.interpretTags(tags, inputs); //doesn't exist anymore. What's the current name of the thing?
                     
                     // String answer = Jeeves.getReply(q); // old file read method
                     //String answer = Jeeves.getReply(q, dba);
@@ -82,7 +83,11 @@ public class Bot {
                     System.out.println("DEBUG: ExecutionOrderException in main!");
                     System.out.println(e);
                     e.printStackTrace();
-
+                    
+                } catch (IOException ioe) {
+                    System.out.println("DEBUG: IOException. Probably in AnswerBuilder. Probably something wrong with the 'action' and 'object' cards...");
+                    System.out.println(ioe);
+                    ioe.printStackTrace();
                 } finally{
                     System.out.println(Jeeves.name + ": " + answer);
                 }
