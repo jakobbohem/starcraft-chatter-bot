@@ -43,7 +43,7 @@ public class Interpreter {
         String action = null;
         String strobject = null;
         String actor = null;
-        String in = input;
+        String in = input.toLowerCase();
         String lastinput;
         boolean foundq = false;
         boolean founda = false;
@@ -128,7 +128,7 @@ public class Interpreter {
                if(in.indexOf(tempstr) >= 0 && (temp.get(0).equals("U") || temp.get(0).equals("B")))
                {
                    strobject = temp.get(1);
-                   System.out.println("Found a object!");
+                 //  System.out.println("Found a object!");
                    foundobj = true;
                    break;
                }
