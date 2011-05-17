@@ -190,10 +190,12 @@ public class DatabaseAccessor implements SQLite.Trace, SQLite.Profile {
             
         }
         catch(SQLite.Exception e){
+            e.printStackTrace();
             System.err.println("Couldn't write card to database.");
             System.err.println(e.getMessage());
             e.printStackTrace();
         } catch(IOException e){
+            e.printStackTrace();
             System.err.println("Couldn't write card to database.");
             System.err.println(e.getMessage());
         }
@@ -337,6 +339,23 @@ public class DatabaseAccessor implements SQLite.Trace, SQLite.Profile {
             throw new DatabaseException("Coudln't find matching card in the database");
         
         return (ItemCard)readBlob(lineNo);
+    }
+
+    public List<ItemCard> getAllItemCards() throws DatabaseException, SQLite.Exception{
+        List<ItemCard> res = new ArrayList<ItemCard>();
+        String query = "select id from "+unitsTable;
+        
+        Stmt stmt = db.prepare(query);
+        try{
+            while (stmt.step()) {
+                int n = Integer.parseInt(stmt.column_string(0));
+                res.add((ItemCard)readBlob(n));
+            }
+        } catch(NumberFormatException ee){
+            System.err.println("Couldn't parse Integer");
+            // couldn't parse this int...
+        }
+        return res;
     }
 
     /**
@@ -562,6 +581,14 @@ public class DatabaseAccessor implements SQLite.Trace, SQLite.Profile {
                 do_exec(db, "drop table "+tablename);
             }
             else return;
+        } catch (java.lang.Exception ex) {
+            Logger.getLogger(DatabaseAccessor.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    public void removeAllUnitCards(){
+        try {
+            do_exec(db, "delete from " + unitsTable);
         } catch (java.lang.Exception ex) {
             Logger.getLogger(DatabaseAccessor.class.getName()).log(Level.SEVERE, null, ex);
         }
