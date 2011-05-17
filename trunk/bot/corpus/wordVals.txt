@@ -10,10 +10,11 @@ Q-who-what unit
 Q-what
 A-build-construct-produce
 A-counter-defeat-works well against
-U-marine
-U-zergling
-U-firebat
-U-hydralisk
+A-upgrade-improve-make better
+U-marine-marines
+U-zergling-zerglings
+U-firebat-firebats
+U-hydralisk-hydralisks
 B-barracks
 B-Spawning pool
 
