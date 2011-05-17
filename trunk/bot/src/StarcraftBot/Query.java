@@ -21,7 +21,7 @@ public class Query {
     public boolean isPlural;
     
     // constr
-    Query(String action, String question, String object, String actor){ // simple String[] constructor:
+    Query(String action, String object, String question, String actor){ // simple String[] constructor:
         // neglecting setting objectStrings for now.    
         this.action=action;
         this.actor=actor;
