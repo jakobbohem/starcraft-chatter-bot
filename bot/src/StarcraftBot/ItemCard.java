@@ -104,6 +104,7 @@ public class ItemCard implements Serializable {
             String key = keyval[0].trim();
             String value = keyval[1].trim();
 
+            try{
             // going through the fields of ItemCard
             if(key.toLowerCase().equals("name"))
                 this.name = value;
@@ -188,8 +189,12 @@ public class ItemCard implements Serializable {
                 else
                     throw new ItemCardException("builtBy only applies to building.");
             }
+
             else throw new ItemCardException("Couldn't interpret input string: '"+arguments[i]+"'");
-                     
+            } catch(NumberFormatException e){
+                System.out.println("Coudln't parse input value as int, not updating that field.");
+                System.out.println(e.getMessage());
+            }
                         
         }
     }

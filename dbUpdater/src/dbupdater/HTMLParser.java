@@ -148,6 +148,7 @@ public class HTMLParser {
             try{
                 int row = dba.updateItemCard(name, updates.toArray(new String[updates.size()]));
                 System.out.printf(" - updated itemCard '%s' on line %d \n",name, row);
+                Tools.printCard(dba.getItemCard(name));
             } catch(DatabaseException e){
                 System.err.printf("Couldn't update database for %s!\n", name);
                 System.err.println(e.getMessage());
@@ -203,7 +204,7 @@ public class HTMLParser {
         // String name = extractor.toString().split(":")[0].trim().replace(" ", "_").toLowerCase();
         // fields to get:
 
-        String name = blocks[0].substring(0, blocks[0].lastIndexOf(" ")).replace(" ", "_");//.toLowerCase();
+        String name = blocks[0].substring(0, blocks[0].lastIndexOf(" ")).replace(" ", "_").toLowerCase();//.toLowerCase();
 
         // can also do e.g.: cooldown, range, attack
         boolean setType = false;

@@ -1,6 +1,9 @@
 # list of liquipedia items for itemcard!
+Barracks
 Zergling
 Marine
 Probe
 Pylon
 High_Templar
+Zealot
+Dragoon

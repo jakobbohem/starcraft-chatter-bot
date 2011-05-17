@@ -25,7 +25,7 @@ public class Bot {
         //DbTests.createSingleMarineDB("corpus/database");
         DatabaseAccessor dba = new DatabaseAccessor();
         
-//        DbTests.test2(dba);
+       DbTests.test2(dba);
 //        DbTests.testAdders(dba);
 
         // Run program

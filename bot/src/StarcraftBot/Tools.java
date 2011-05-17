@@ -26,7 +26,15 @@ public class Tools {
         System.out.println(" --- ITEM CARD ---");
         System.out.println(" Name: "+card.name);
         System.out.println(" Tier: "+card.tier);
+        System.out.println(" Type: "+card.type);
         System.out.println(" Builds at: "+ card.buildsAt);
+        // fields added from online!
+        System.out.println(" Minerals: "+card.mineralCost);
+        System.out.println(" Gas: "+card.gasCost);
+        System.out.println(" build time: "+card.buildTime);
+        System.out.println(" Health: "+card.health);
+        System.out.println(" Armour: "+card.armour);
+
     }
     /** method returns the columns to insert into for use in SQL queries,
      * stripping the keywords used in the schema for table creation.
