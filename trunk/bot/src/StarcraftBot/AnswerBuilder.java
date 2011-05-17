@@ -104,6 +104,7 @@ public class AnswerBuilder {
                     } else if (objectField.equals("size")) {
                         replacement = readSize(actor, grammar);
                     }
+                    replacement = "[unknown]";
                     //etc. One elif for every field in the itemCard. Not very pretty. Better way to do this?
                     /*Fields remaining: counter, 
                      * strongAgainst, buildTime, health, armour, food, 
@@ -147,6 +148,8 @@ public class AnswerBuilder {
                     } else if (objectField.equals("buildingTier")) {
                         replacement = readBuildingTier(item, grammar);
                     }
+                    if(replacement.isEmpty())
+                        replacement = "[unknown]";
                 }
                 else if (objectType.equals("yn")){
                     //Do YN question
