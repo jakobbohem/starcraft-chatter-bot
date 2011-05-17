@@ -25,6 +25,7 @@ public class ItemCard implements Serializable {
     public String buildsAt;
     public String[] counter;
     public String[] strongAgainst;
+    public String[] upgradeAt;
     public String buildingTier; //Advanced or Basic
     public int buildTime;
     public int health;
@@ -64,6 +65,7 @@ public class ItemCard implements Serializable {
                     counter=new String[] {"vulture"};
                     buildsAt="Barracks";
                     strongAgainst=new String[] {"light"};
+                    upgradeAt = new String[] {"Academy","Engineering Bay"};
 
                     buildTime=24;
                     mineralCost=50;
@@ -121,6 +123,11 @@ public class ItemCard implements Serializable {
                 String[] array = new String[strongAgainst.length+1];
                 array[array.length] = value;
                 strongAgainst = array;
+            }
+            else if(key.toLowerCase().equals("upgradesat")) {
+                String[] array = new String[upgradeAt.length+1];
+                array[array.length] = value;
+                upgradeAt = array;
             }
             else if(key.toLowerCase().equals("buildingtier"))
                 this.buildingTier = value;
