@@ -239,10 +239,11 @@ public class DatabaseAccessor implements SQLite.Trace, SQLite.Profile {
         return atRow;
     }
 
-    public int handleUnknownQuery(Query query){
+    public int handleUnknownQuery(String message, String[] problems, Query query){
         int row=0;
         try {
             // write to unknownDB
+            // TODO: Handle message and problem strings.
             row = write(query.object, query);
             
             // do other things..?
