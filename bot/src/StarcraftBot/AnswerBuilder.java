@@ -50,7 +50,7 @@ public class AnswerBuilder {
      * @param dba Needed to access the database.
      * @return The finished answer.
      */
-    public String getAnswer(int qID, Query query) throws IOException {
+    public String getAnswer(int qID, Query query) throws IOException, ItemCardException {
         try {
             String cannedPhrase = dba.getCannedPhrase(qID);
             String action = query.action;
@@ -98,13 +98,18 @@ public class AnswerBuilder {
 
                     sphM.find();
                     char grammar = sphM.group().charAt(0);
-
                     if (objectField.equals("name")) {
                         replacement = readName(actor, grammar);
                     } else if (objectField.equals("buildsAt")) {
                         replacement = readBuildsAt(actor, grammar);
                     } else if (objectField.equals("techTree")) {
                         replacement = readTechTree(actor, grammar);
+                    } else if (objectField.equals("builtBy")) {
+                        replacement = readBuiltBy(actor, grammar);
+                    } else if (objectField.equals("type")) {
+                        replacement = readType(actor, grammar);
+                    } else if (objectField.equals("size")) {
+                        replacement = readSize(actor, grammar);
                     }
                     //etc. One elif for every field in the itemCard. Not very pretty. Better way to do this?
                     /*Fields remaining: counter, 
@@ -131,6 +136,12 @@ public class AnswerBuilder {
                         replacement = readBuildsAt(item, grammar);
                     } else if (objectField.equals("techTree")) {
                         replacement = readTechTree(item, grammar);
+                    } else if (objectField.equals("builtBy")) {
+                        replacement = readBuiltBy(item, grammar);
+                    } else if (objectField.equals("type")) {
+                        replacement = readType(item, grammar);
+                    } else if (objectField.equals("size")) {
+                        replacement = readSize(item, grammar);
                     }
                 }
                 replacements.add(replacement);
@@ -142,11 +153,12 @@ public class AnswerBuilder {
             }
             return answer;
         } catch (SQLite.Exception sqle) {
+            System.out.print("SQLite error in 'AnswerBuilder'.");
             sqle.printStackTrace();
         } catch (IOException dbE) {
-            dbE.printStackTrace();
+            throw dbE;
         } catch (ItemCardException ice) {
-            //Print to log or something.
+            dba.handleUnknownQuery(ice.toString(),ice.getProblems(),query);
             return "Don't know. I'll ask an expert, ask again later.";
         }
         return null;
@@ -175,7 +187,7 @@ public class AnswerBuilder {
      */
     private String readName(ItemCard item, char grammar) throws ItemCardException {
         if (item.name == null) {
-            throw new ItemCardException("name", item);
+            throw new ItemCardException("missing field",new String[]{"name"});
         }
 
         String name = item.name;
@@ -197,7 +209,7 @@ public class AnswerBuilder {
      */
     private String readType(ItemCard item, char grammar) throws ItemCardException {
         if (item.type == null) {
-            throw new ItemCardException("type", item);
+            throw new ItemCardException("missing field",new String[]{"type"});
         }
         return item.type;
     }
@@ -212,7 +224,7 @@ public class AnswerBuilder {
      */
     private String readSize(ItemCard item, char grammar) throws ItemCardException {
         if (item.size == null) {
-            throw new ItemCardException("size", item);
+            throw new ItemCardException("missing field",new String[]{"size"});
         }
         return item.size;
     }
@@ -228,7 +240,7 @@ public class AnswerBuilder {
      */
     private String readCounter(ItemCard item, char grammar) throws ItemCardException {
         if (item.counter == null) {
-            throw new ItemCardException("counter", item);
+            throw new ItemCardException("missing field",new String[]{"counter"});
         }
         return null;
     }
@@ -243,7 +255,7 @@ public class AnswerBuilder {
      */
     private String readBuildsAt(ItemCard item, char grammar) throws ItemCardException {
         if (item.buildsAt == null) {
-            throw new ItemCardException("BuildsAt", item);
+            throw new ItemCardException("missing field",new String[]{"BuildsAt"});
         }
 
         String buildsAt = item.buildsAt;
@@ -266,7 +278,7 @@ public class AnswerBuilder {
      */
     private String readBuiltBy(ItemCard item, char grammar) throws ItemCardException {
         if (item.builtBy == null) {
-            throw new ItemCardException("builtBy", item);
+            throw new ItemCardException("missing field",new String[]{"builtBy"});
         }
 
         String builtBy = item.builtBy;
@@ -284,12 +296,13 @@ public class AnswerBuilder {
      * separates as needed. Uses and for the last one. Pretty neat.
      * @param item The card containing the field. 
      * @param grammar Dummy. Not used atm.
-     * @return A string consisting of the list of requirements for the unit.
+     * @return A string consisting of the list of requirements for the unit. On
+     * the form "req1, req2, req3 and req4" etc. 
      * @throws ItemCardException if the field is empty.
      */
     private String readTechTree(ItemCard item, char grammar) throws ItemCardException {
         if (item.techTreeList == null && item.techTree == null) {
-            throw new ItemCardException("TechTree", item);
+            throw new ItemCardException("missing field",new String[]{"TechTree"});
         }
 
         List<String> ttl = item.techTreeList;
