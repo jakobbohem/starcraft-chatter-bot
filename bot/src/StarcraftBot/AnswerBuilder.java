@@ -4,11 +4,18 @@
  */
 package StarcraftBot;
 
-import java.util.*;
-import java.util.regex.*;
-import java.io.IOException;
+import java.util.*; //Lists
+import java.util.regex.*; //Regex. Self expanatory.
+import java.io.IOException; //Thrown in case the answer needs an ItemCard which cannot be fetched (name missing etc.).
 
 /**
+ * Creates an answer String from a query and a question-id. The file should be 
+ * constructed with the databaseaccessor which accesses the database you're going
+ * to use. Then just call AnswerBuilder.getAnswer(qID, query) and you'll get a 
+ * string returned (or an exception. there's a lot of those) which can be 
+ * presented to the user.
+ * 
+ * 
  * Notes for usage: The cannedPhrase string in the database should use placeholders
  * on the form %object&objectField&grammarTag%. If the object is "action", the
  * objectField mustn't be present. The grammarTag is defined as:
@@ -19,7 +26,7 @@ import java.io.IOException;
  * <b>Verbs</b>:<br>
  *  p: <i>past tense</i> (created, countered)<br>
  *  anything else: <i>base form</i> (create, counter)<br>
- * @author antonsorensen
+ * @author anton sorensen
  */
 public class AnswerBuilder {
 
@@ -146,10 +153,10 @@ public class AnswerBuilder {
     }
 
     /**
-     * 
-     * @param action
-     * @param grammar
-     * @return 
+     * Applies grammar to the action.
+     * @param action Action to be grammarised.
+     * @param grammar How to grammarise.
+     * @return Grammarised action string.
      */
     private String buildAction(String action, char grammar) {
         if (grammar == 'p') {
@@ -158,7 +165,14 @@ public class AnswerBuilder {
             return action;
         }
     }
-
+    /**
+     * Reads the name field. Checks if it's there (if not, throw exception). 
+     * Grammarise, then return.
+     * @param item Contains the field.
+     * @param grammar How to grammarise.
+     * @return Grammarised field value.
+     * @throws ItemCardException if the field is empty.
+     */
     private String readName(ItemCard item, char grammar) throws ItemCardException {
         if (item.name == null) {
             throw new ItemCardException("name", item);
@@ -173,7 +187,14 @@ public class AnswerBuilder {
             return name;
         }
     }
-
+/**
+     * Reads the type field. Checks if it's there (if not, throw exception). 
+     * Return value of field.
+     * @param item Contains the field.
+     * @param grammar Dummy. There because I couldn't be assed to remove it.
+     * @return Field value.
+     * @throws ItemCardException if the field is empty.
+     */
     private String readType(ItemCard item, char grammar) throws ItemCardException {
         if (item.type == null) {
             throw new ItemCardException("type", item);
@@ -181,6 +202,14 @@ public class AnswerBuilder {
         return item.type;
     }
 
+    /**
+     * Reads the size field. Checks if it's there (if not, throw exception). 
+     * Return value of field.
+     * @param item Contains the field.
+     * @param grammar Dummy. There because I couldn't be assed to remove it.
+     * @return Field value.
+     * @throws ItemCardException if the field is empty.
+     */
     private String readSize(ItemCard item, char grammar) throws ItemCardException {
         if (item.size == null) {
             throw new ItemCardException("size", item);
@@ -188,6 +217,15 @@ public class AnswerBuilder {
         return item.size;
     }
 
+    /**
+     * Reads the type field. Checks if it's there (if not, throw exception). 
+     * This field needs to be formatted - the counters field is an array of stuff.
+     * Probably needs to be grammarised as well.
+     * @param item Contains the field.
+     * @param grammar Dummy. There because I couldn't be assed to remove it.
+     * @return Field value.
+     * @throws ItemCardException if the field is empty.
+     */
     private String readCounter(ItemCard item, char grammar) throws ItemCardException {
         if (item.counter == null) {
             throw new ItemCardException("counter", item);
@@ -195,6 +233,14 @@ public class AnswerBuilder {
         return null;
     }
 
+    /**
+     * Reads the buildsat field. Checks if it's there (if not, throw exception). 
+     * Grammarise, then return string.
+     * @param item Contains the field.
+     * @param grammar How to grammarise the answer.
+     * @return Field value.
+     * @throws ItemCardException if the field is empty.
+     */
     private String readBuildsAt(ItemCard item, char grammar) throws ItemCardException {
         if (item.buildsAt == null) {
             throw new ItemCardException("BuildsAt", item);
@@ -210,6 +256,14 @@ public class AnswerBuilder {
         return buildsAt;
     }
 
+    /**
+     * Reads the builtby field. Checks if it's there (if not, throw exception). 
+     * Grammarise, then return string.
+     * @param item Contains the field.
+     * @param grammar How to grammarise the answer.
+     * @return Field value.
+     * @throws ItemCardException if the field is empty.
+     */
     private String readBuiltBy(ItemCard item, char grammar) throws ItemCardException {
         if (item.builtBy == null) {
             throw new ItemCardException("builtBy", item);
@@ -225,6 +279,14 @@ public class AnswerBuilder {
         return builtBy;
     }
 
+    /**
+     * Returns a formatted tech tree. It reads the list of items and comma
+     * separates as needed. Uses and for the last one. Pretty neat.
+     * @param item The card containing the field. 
+     * @param grammar Dummy. Not used atm.
+     * @return A string consisting of the list of requirements for the unit.
+     * @throws ItemCardException if the field is empty.
+     */
     private String readTechTree(ItemCard item, char grammar) throws ItemCardException {
         if (item.techTreeList == null && item.techTree == null) {
             throw new ItemCardException("TechTree", item);
