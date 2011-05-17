@@ -453,20 +453,20 @@ public class AnswerBuilder {
     private boolean isInCounter(ItemCard actor, ItemCard target){
         String[] counters = target.counter;
         String[] strongAgainst = actor.strongAgainst;
-        String actName = actor.name;
-        String tarName = target.name;
+        String actName = actor.name.toLowerCase();
+        String tarName = target.name.toLowerCase();
         
         boolean isStrongAgainst = false;
         boolean doesCounter = false;
         for (int i = 0; i < counters.length; i++) {
-            if (counters[i].equals(actName)){
+            if (counters[i].toLowerCase().equals(actName)){
                 isStrongAgainst = true;
                 break;
             }
             
         }
         for (int i = 0; i < strongAgainst.length; i++) {
-            if (strongAgainst[i].equals(tarName)){
+            if (strongAgainst[i].toLowerCase().equals(tarName)){
                 doesCounter = true;
                 break;
             }
@@ -484,7 +484,11 @@ public class AnswerBuilder {
             return noun;
     }
     
-    public String testMethod(ItemCard icTest) throws ItemCardException{
-        return readUpgradeAt(icTest, 'i');
+    public String testMethod(ItemCard icTest, ItemCard icTest2, char gram) throws ItemCardException{
+        if(isInCounter(icTest2,icTest))
+            return "yes";
+        else
+            return "no";
+    
     }
 }
