@@ -92,6 +92,8 @@ public class Bot {
         }// end of BIG try
         catch (java.lang.Exception e) {
             System.err.println("RUNTIME ERROR!");
+            System.err.println(e.getMessage());
+            e.printStackTrace();
         }
     }
 }

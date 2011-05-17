@@ -321,7 +321,7 @@ public class DatabaseAccessor implements SQLite.Trace, SQLite.Profile {
      * @return
      */
     public ItemCard getItemCard(String name) throws DatabaseException, SQLite.Exception{
-        String query = "select id from "+unitsTable+" where name='"+name.toLowerCase()+"'";
+         String query = "select id from "+unitsTable+" where name='"+name.toLowerCase()+"'";
         
         int lineNo = 0; // default
         lineNo = getInt(query); // get return integer from Query ('Count(*)')

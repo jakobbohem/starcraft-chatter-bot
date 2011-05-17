@@ -41,19 +41,31 @@ public class Query {
     
     // public methods
     public boolean baseCheckNotNull(){
-        if (action == null || object == null)
+        if (action == null || objectNotNull())
             return false;
         else return true;
     }
     public boolean checkNotNull(){
-        if (action == null || object == null || question == null)
+        if (action == null || objectNotNull() || question == null)
             return false;
         else return true;
     }
     public boolean hardCheckNotNull(){
-        if (action == null || question == null || object == null || actor == null)
+        if (action == null || question == null || objectNotNull() || actorNotNull())
             return false;
         else return true;
+    }
+    
+    public boolean actorNotNull(){
+        if (actor==null)
+            return false;
+        return true;
+    }
+    
+    public boolean objectNotNull(){
+        if (object==null)
+            return false;
+        return true;
     }
     
     public String[] getMetadata() {
