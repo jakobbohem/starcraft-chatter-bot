@@ -54,7 +54,7 @@ public class AnswerBuilder {
     public String getAnswer(int qID, Query query) throws IOException, DatabaseException {
         String answer = "";
         try {
-            String cannedPhrase = dba.getCannedPhrase(qID).replace(".","&"); //"%object&name&p% is %action&p% at %object&buildsAt&o%";//dba.getCannedPhrase(qID);
+            String cannedPhrase = dba.getCannedPhrase(qID); //"%object&name&p% is %action&p% at %object&buildsAt&o%";//dba.getCannedPhrase(qID);
             String action = query.action;
 
             ItemCard actor = null;
