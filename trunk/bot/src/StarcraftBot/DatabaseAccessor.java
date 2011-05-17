@@ -69,6 +69,13 @@ public class DatabaseAccessor implements SQLite.Trace, SQLite.Profile {
         
         
     }
+    
+    public void close() throws SQLite.Exception {
+        db.close(); //finally...
+    }
+    
+    // High level methods for database manipulation:
+    
     private void createTable(String tablename, String[] schema){
         try{
             // create the three tables (unit data, query table, response table)
