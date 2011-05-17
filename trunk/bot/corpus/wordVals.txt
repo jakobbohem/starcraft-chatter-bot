@@ -8,6 +8,7 @@ Q-where-which building-what building
 Q-when
 Q-who-what unit 
 Q-what
+Q-yn-do-does-can
 A-build-construct-produce
 A-counter-defeat-works well against
 A-upgrade-improve-make better
