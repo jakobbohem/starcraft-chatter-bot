@@ -118,13 +118,15 @@ public class AnswerBuilder {
                     else
                         throw new IOException("Need object. No object.");
                     
-                    /*TODO: 
-                     * if first match after "object" is "all", then loop through items.
+                    /*TODO: if first match after "object" is "all", then loop through items.
                      * otherwise, if given a digit, use items.get(digit).
                      * otherwise, if there's something neither a digit or "a", use
                      * the first entry of items.
                      */
+                    sphM.find();
                     String objectField = sphM.group();
+                    
+                    sphM.find();
                     char grammar = sphM.group().charAt(0);
 
                     if (objectField.equals("name")) {
@@ -140,6 +142,38 @@ public class AnswerBuilder {
                     } else if (objectField.equals("size")) {
                         replacement = readSize(item, grammar);
                     }
+                }
+                else if (objectType.equals("yn")){
+                    //Do YN question
+                    if (query.objectNotNull() && itemSet==false) {
+                        item = dba.getItemCard(query.object);
+                        itemSet = true;
+                    }
+                    else
+                        throw new IOException("Need object. No object.");
+                    
+                    if (query.actorNotNull() && actorSet==false){
+                        actor = dba.getItemCard(query.actor);
+                        actorSet = true;
+                    }
+                    else
+                        throw new IOException("Need actor. No Actor.");
+                    
+                    sphM.find();
+                    String objectField = sphM.group();
+                    
+                    boolean isIn = false;
+                    
+                    if (objectField.equals("counter")) {
+                         isIn = isInCounter(actor,item);
+                    } else if (objectField.equals("buildsAt")) {
+                        //isIn = isInBuildsAt(actor,item);
+                    } else if (objectField.equals("builtBy")) {
+                        //isIn = isInBuiltBy(actor,item);
+                    } else if (objectField.equals("strongAgainst")) {
+                        //isIn = isInStrongAgainst(actor,item);
+                    } 
+                    
                 }
                 replacements.add(replacement);
             }
@@ -351,6 +385,31 @@ public class AnswerBuilder {
                     GrammarEngine.nounIndefinite(ttl.get(0)));
             return returnStr;
         }
+    }
+    
+    private boolean isInCounter(ItemCard actor, ItemCard target){
+        String[] counters = target.counter;
+        String[] strongAgainst = actor.strongAgainst;
+        String actName = actor.name;
+        String tarName = target.name;
+        
+        boolean isStrongAgainst = false;
+        boolean doesCounter = false;
+        for (int i = 0; i < counters.length; i++) {
+            if (counters[i].equals(actName)){
+                isStrongAgainst = true;
+                break;
+            }
+            
+        }
+        for (int i = 0; i < strongAgainst.length; i++) {
+            if (strongAgainst[i].equals(tarName)){
+                doesCounter = true;
+                break;
+            }
+            
+        }
+        return (isStrongAgainst&&doesCounter);
     }
     
     private String geNoun(String noun, char grammar){
