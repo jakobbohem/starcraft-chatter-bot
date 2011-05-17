@@ -7,6 +7,7 @@ package StarcraftBot;
 import java.util.*; //Lists
 import java.util.regex.*; //Regex. Self expanatory.
 import java.io.IOException; //Thrown in case the answer needs an ItemCard which cannot be fetched (name missing etc.).
+import StarcraftBot.DatabaseAccessor.DatabaseException;
 
 /**
  * Creates an answer String from a query and a question-id. The file should be 
@@ -50,16 +51,16 @@ public class AnswerBuilder {
      * @param dba Needed to access the database.
      * @return The finished answer.
      */
-    public String getAnswer(int qID, Query query) throws IOException, ItemCardException {
+    public String getAnswer(int qID, Query query) throws IOException, DatabaseException {
+        String answer = "";
         try {
-            String cannedPhrase = dba.getCannedPhrase(qID);
+            String cannedPhrase = dba.getCannedPhrase(qID); //"%object&name&p% is %action&p% at %object&buildsAt&o%";//dba.getCannedPhrase(qID);
             String action = query.action;
 
-            ItemCard actor, item;
-            boolean actorSet = false;
-            boolean itemSet = false;
+            ItemCard actor = null;
+            ItemCard item = null;
             LinkedList<String> replacements = new LinkedList<String>();
-            String answer = "";
+            
 
             Pattern phP = Pattern.compile("%[\\w&]*%");
             Matcher phM = phP.matcher(cannedPhrase);
@@ -79,10 +80,9 @@ public class AnswerBuilder {
                     replacement = buildAction(action, grammar);
                 } //If the object is an actor, check which field is requested and do the corresponding formatting.
                 else if (objectType.equals("actor")) {
-                    if (query.actorNotNull() && actorSet==false){
-                        actor = dba.getItemCard(query.actor);
-                        actorSet = true;
-                    }
+                    if (query.actorNotNull())
+                        if(actor==null)
+                            actor = dba.getItemCard(query.actor);
                     else
                         throw new IOException("Need actor. No Actor.");
 
@@ -111,9 +111,10 @@ public class AnswerBuilder {
                      */
                 } //Like actor, but checks which entries in the list 'items' to use.
                 else if (objectType.equals("object")) {
-                    if (query.objectNotNull() && itemSet==false) {
-                        item = dba.getItemCard(query.object);
-                        itemSet = true;
+                    if (query.objectNotNull()){
+                        if(item==null) {
+                            item = dba.getItemCard(query.object);
+                        }
                     }
                     else
                         throw new IOException("Need object. No object.");
@@ -145,16 +146,19 @@ public class AnswerBuilder {
                 }
                 else if (objectType.equals("yn")){
                     //Do YN question
-                    if (query.objectNotNull() && itemSet==false) {
-                        item = dba.getItemCard(query.object);
-                        itemSet = true;
+                    if (query.objectNotNull()){
+                        if(item==null) {
+                            item = dba.getItemCard(query.object);
+                            
+                        }
                     }
                     else
                         throw new IOException("Need object. No object.");
                     
-                    if (query.actorNotNull() && actorSet==false){
-                        actor = dba.getItemCard(query.actor);
-                        actorSet = true;
+                    if (query.actorNotNull())
+                    {
+                        if(actor==null)
+                            actor = dba.getItemCard(query.actor);
                     }
                     else
                         throw new IOException("Need actor. No Actor.");
@@ -188,13 +192,11 @@ public class AnswerBuilder {
         } catch (SQLite.Exception sqle) {
             System.out.print("SQLite error in 'AnswerBuilder'.");
             sqle.printStackTrace();
-        } catch (IOException dbE) {
-            throw dbE;
         } catch (ItemCardException ice) {
             dba.handleUnknownQuery(ice.toString(),ice.getProblems(),query);
             return "Don't know. I'll ask an expert, ask again later.";
         }
-        return "";
+        return "DEBUG: PASSED THROUGH ENTIRE ANSWERBUILDER WITH NO ANSWER!!";
     }
 
     /**

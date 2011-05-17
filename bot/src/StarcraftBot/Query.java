@@ -3,7 +3,6 @@
  * and open the template in the editor.
  */
 package StarcraftBot;
-
 /**
  *
  * @author jakob
@@ -79,13 +78,21 @@ public class Query {
         else return new String[] {""};
     }
     
-    public String[] buildSearchPhrase() throws Exception {
-        if(hardCheckNotNull())
-            return new String[] {"action:"+action, "question:"+question, "object:"+object, "actor:"+actor};
-        else if(checkNotNull())
-            return new String[] {"question:"+question, "action:"+action, "object:"+object};
-        else if(baseCheckNotNull())
-            return new String[] {"action:"+action, "object:"+object};
+    public String[] buildSearchPhrase(DatabaseAccessor dba) throws Exception {
+        if(hardCheckNotNull()){
+            ItemCard objCard = dba.getItemCard(object);
+            ItemCard aCard = dba.getItemCard(actor);
+            return new String[] {"action:"+action, "question:"+question, "object:"+objCard.type, "actor:"+aCard.type};
+        }
+        else if(checkNotNull()){
+            ItemCard objCard = dba.getItemCard(object);
+            return new String[] {"question:"+question, "action:"+action, "object:"+objCard.type};
+        }
+        else if(baseCheckNotNull()){
+            ItemCard objCard = dba.getItemCard(object);
+            return new String[] {"action:"+action, "object:"+objCard.type};
+            
+        }
         throw new java.lang.Exception("Not enough labels!");
     }
 

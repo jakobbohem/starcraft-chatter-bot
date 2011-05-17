@@ -23,8 +23,8 @@ public class Bot {
 
         // Run basic database implementation test:
         DatabaseAccessor dba = new DatabaseAccessor();
-        DbTests.test2(dba);
-        DbTests.testAdders(dba);
+//        DbTests.test2(dba);
+//        DbTests.testAdders(dba);
 
         // Run program
         int exitcode = 0;
@@ -57,8 +57,6 @@ public class Bot {
                     ArrayList<ArrayList> tags = tagger.getTagList();
                     //Tools.printArray(tagger.getLastChunks());
                     //Tools.printArray(tags);
-                    
-                    // do some interpretation:
                     
                     Query q = Jeeves.interpretTags(tags, inp, exitcode);
                     
@@ -96,7 +94,7 @@ public class Bot {
                 }
                 // now get the labels and print them!
             } // end of while
-
+            dba.close();
         }// end of BIG try
         catch (java.lang.Exception e) {
             System.err.println("RUNTIME ERROR!");

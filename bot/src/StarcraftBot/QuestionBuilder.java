@@ -23,7 +23,7 @@ public class QuestionBuilder {
     
     public int getQID(Query q) {
         try {
-            String[] md = q.buildSearchPhrase();
+            String[] md = q.buildSearchPhrase(dba);
             return dba.getQid(md);
         }
         //This class could possibly be used to define what keywords to search for to narrow down the search in case of multiple answers.
