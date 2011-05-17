@@ -74,8 +74,8 @@ public class ItemCard implements Serializable {
                     // create the addons:
                     //abilities = new Addon[1];
                     //upgrades = new Addon[1];
-                    //abilities[0] = new Addon("stim pack", name, "Academy");
-                    //upgrades[0] = new Addon("U-238 shells", name, "Academy");
+                    //abilities[0] = new Addon("stim pack", this.name, "Academy");
+                    //upgrades[0] = new Addon("U-238 shells", this.name, "Academy");
 
                 }
                 else throw new Exception("couldn't find match for unit type '"+unitType+"'. try again.");
@@ -139,7 +139,7 @@ public class ItemCard implements Serializable {
                 else
                     throw new ItemCardException("builtBy only applies to building.");
             }
-            else throw new ItemCardException("Couldn't interpret input string: "+arguments[i]);
+            else throw new ItemCardException("Couldn't interpret input string"+arguments[i]);
                      
                         
         }
