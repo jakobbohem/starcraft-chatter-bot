@@ -124,11 +124,13 @@ public class AnswerBuilder {
                      * otherwise, if there's something neither a digit or "a", use
                      * the first entry of items.
                      */
+                    
                     sphM.find();
                     String objectField = sphM.group();
                     
-                    sphM.find();
-                    char grammar = sphM.group().charAt(0);
+                    char grammar = 'o';
+                    if(sphM.find());
+                        grammar = sphM.group().charAt(0);
 
                     if (objectField.equals("name")) {
                         replacement = readName(item, grammar);
@@ -142,6 +144,8 @@ public class AnswerBuilder {
                         replacement = readType(item, grammar);
                     } else if (objectField.equals("size")) {
                         replacement = readSize(item, grammar);
+                    } else if (objectField.equals("buildingTier")) {
+                        replacement = readBuildingTier(item, grammar);
                     }
                 }
                 else if (objectType.equals("yn")){
@@ -169,7 +173,10 @@ public class AnswerBuilder {
                     boolean isIn = false;
                     
                     if (objectField.equals("counter")) {
-                        isIn = isInCounter(actor,item);
+                        if (isInCounter(actor,item))
+                            replacements.add("Yes.");
+                        else
+                            replacements.add("No.");
                     } else if (objectField.equals("buildsAt")) {
                         //isIn = isInBuildsAt(actor,item);
                     } else if (objectField.equals("builtBy")) {
@@ -234,7 +241,8 @@ public class AnswerBuilder {
             return name;
         }
     }
-/**
+    
+    /**
      * Reads the type field. Checks if it's there (if not, throw exception). 
      * Return value of field.
      * @param item Contains the field.
@@ -247,6 +255,21 @@ public class AnswerBuilder {
             throw new ItemCardException("missing field",new String[]{"type"});
         }
         return item.type;
+    }
+    
+    /**
+     * Reads the buildingTier field. Checks if it's there (if not, throw exception). 
+     * Return value of field.
+     * @param item Contains the field.
+     * @param grammar Dummy. There because I couldn't be assed to remove it.
+     * @return Field value.
+     * @throws ItemCardException if the field is empty.
+     */
+    private String readBuildingTier(ItemCard item, char grammar) throws ItemCardException {
+        if (item.buildingTier == null) {
+            throw new ItemCardException("missing field",new String[]{"buildingTier"});
+        }
+        return item.buildingTier;
     }
 
     /**
