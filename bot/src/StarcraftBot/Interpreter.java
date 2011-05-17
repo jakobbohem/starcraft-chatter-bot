@@ -150,7 +150,7 @@ public class Interpreter {
                    {
                        actor = temp.get(1);
                    
-                   System.out.println("Found an actor!");
+                   //System.out.println("Found an actor!");
                        foundactor = true;
                        break;
                    }
@@ -222,16 +222,6 @@ public class Interpreter {
         finally {}
         if(exit == 1)
             System.exit(0);
-        // - - - - -
-        //      NOTE: THESE SETTINGS MIGHT HAVE TO BE SET IN CONSTRUCTOR:
-        // - - - - -
-            // Set query member fields:
-          //  query.setTokens(inputs);
-            //query.setTags(tags);
-//            if(strobject.endsWith("s"))
-//                query.isPlural=true;
-//            else
-//                query.isPlural=false;
 
 
         
