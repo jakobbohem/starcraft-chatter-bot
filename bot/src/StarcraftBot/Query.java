@@ -10,6 +10,7 @@ package StarcraftBot;
  */
 public class Query {
     // instance fields:
+    String userPostedAction;
     String action;
     String question;
     String[] objectStrings;
