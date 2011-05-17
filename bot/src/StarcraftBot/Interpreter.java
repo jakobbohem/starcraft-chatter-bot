@@ -185,11 +185,25 @@ public class Interpreter {
         "Saying the same thing over and over won't produce the result you are looking for. \n",
         "Yes, I believe you just said that. Try entering something else this time. \n"
         };
-        
+        String[] noKeywords = new String[]{"I couldn't relate your question to Starcraft at all. Perhaps you phrased it badly? \n",
+        "Nope, didn't understand that at all. Remember to keep the questions related to Starcraft!\n",
+        "I'm afraid that has nothing to do with Starcraft, and my programming prohibits me from commenting further.\n"
+        };
+        String[] onlyQuestion = new String[]{question + " what? Please clarify.\n",
+        "You said " + question + ", but " + question + " what?\n"            
+        };
+        String[] onlyObject = new String[]{"Ah, you're talking about " + strobject + "s. I know all about that! Ask me anything game related about " + strobject + ".\n",
+        "You can ask me anything about " + strobject + "s!\n",
+        "I'm a bit of an expert on " + strobject + "s, if I do say so myself. Ask me something about that!\n"
+        };
         
         // Follow up questions. TODO! Right now the user has to ask
         // a completely new question. Make it so that the follow up is more natural!
         Scanner scan = new Scanner(System.in);
+        if(question == null && action == null && strobject == null && actor == null)
+        {
+            System.out.println(noKeywords[random.nextInt(3)]);
+        }
         if(question == null && action != null && strobject == null )
         {
             System.out.println(onlyAction[random.nextInt(3)]);
@@ -198,11 +212,11 @@ public class Interpreter {
         }
         else if(question != null && action == null && strobject == null)
         {
-            System.out.println( question + " what? Please clarify.");
+            System.out.println( onlyQuestion[random.nextInt(2)]);
         }
         else if(question == null && action == null && strobject != null)
         {
-            System.out.println( "Ah, you're talking about " + strobject + "s. I know all about that! Ask me anything game related about " + strobject + ".");
+            System.out.println( onlyObject[random.nextInt(3)]);
         }
         else if(question == null && action != null && strobject != null)
         {
