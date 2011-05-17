@@ -16,7 +16,7 @@ public class ItemCardException extends Exception {
     }
     
     public ItemCardException(String msg, String[] problem){
-        this.msg = msg;
+        super(msg);
         this.problem = problem;
     }
     
@@ -26,9 +26,5 @@ public class ItemCardException extends Exception {
     
     public String[] getProblems() {
         return problem;
-    }
-    
-    public String toString() {
-        return msg;
     }
 }

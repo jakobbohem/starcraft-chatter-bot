@@ -18,7 +18,7 @@ public class GrammarEngine {
 			return "made";
 		
 		
-		char lastChar = verb.charAt(verb.length()-1);
+		char lastChar = verb.toLowerCase().charAt(verb.length()-1);
 		
 		if (lastChar=='e'){
 			return verb+"d";
@@ -35,7 +35,7 @@ public class GrammarEngine {
 		//query database of irregular nouns for 'noun'
 		//if in list, return plural field
 		
-		char lastChar = noun.charAt(noun.length()-1);
+		char lastChar = noun.toLowerCase().charAt(noun.length()-1);
 		
 		//If the last part is sibilant, return noun+"es"
 		if (lastChar=='s'|| lastChar=='x') {
@@ -44,9 +44,9 @@ public class GrammarEngine {
 		//If last character is y, check that the second last character is not a noun. 
 		//If so, replace the ending y with ies and return
 		else if (lastChar=='y'){
-			char secondLastChar = noun.charAt(noun.length()-2);
+			char secondLastChar = noun.toLowerCase().charAt(noun.length()-2);
 			if (!isVowel(secondLastChar)){
-				return noun.substring(0,noun.length()-1)+"ies";
+				return noun.toLowerCase().substring(0,noun.length()-1)+"ies";
 			} else
 				return noun+"s";
 		} else
@@ -59,7 +59,7 @@ public class GrammarEngine {
 	 * @return A string consisting of "a \<noun\>" or "an \<noun\>"
 	 */
 	public static String nounIndefinite(String noun){
-		if (isVowel(noun.charAt(0)))
+		if (isVowel(noun.toLowerCase().charAt(0)))
 			return "an "+noun;
 		else
 			return "a "+noun;
