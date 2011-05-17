@@ -53,18 +53,20 @@ public class Bot {
                     String[] inputs = tagger.chopString(inp); // also sets the lastUsedString property
                     // equal to getLastChunks
 
-                    String[] tags = tagger.getTagsFromDatabase();
+                    ArrayList<ArrayList> tags = tagger.getTagList();
                     Tools.printArray(tagger.getLastChunks());
-                    Tools.printArray(tags);
-
+                    //Tools.printArray(tags);
+                    Query q = new Query(null,null);
                     // do some interpretation:
                     
-                    Query q = Jeeves.interpretTags(tags, inputs); //doesn't exist anymore. What's the current name of the thing?
+                    q = Jeeves.interpretTags(tags, inp, exitcode);
                     
                     // String answer = Jeeves.getReply(q); // old file read method
                     //String answer = Jeeves.getReply(q, dba);
                     
                     //New shiny getAnswer method.
+                    if(q == null)
+                       System.exit(0);
                     answer = ab.getAnswer(qb.getQID(q), q);
 
                     
