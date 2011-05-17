@@ -254,6 +254,14 @@ public class DatabaseAccessor implements SQLite.Trace, SQLite.Profile {
         }
         return row;
     }
+    /**
+     * 
+     * @param question
+     * @param members
+     * @param response
+     * @return
+     * @throws StarcraftBot.DatabaseAccessor.DatabaseException 
+     */
     public long addQuery(String question, ArrayList<String> members, Response response) throws DatabaseException {
         // version with the response-object writing to canned phrases in database.
         // this is so that more than one canned phrase can be added at once.
@@ -339,6 +347,9 @@ public class DatabaseAccessor implements SQLite.Trace, SQLite.Profile {
             throw new DatabaseException("Coudln't find matching card in the database");
         
         return (ItemCard)readBlob(lineNo);
+    }
+    public long getDefaultQID() throws SQLite.Exception {
+        return getInt("select queryId from "+qTable);
     }
 
     public List<ItemCard> getAllItemCards() throws DatabaseException, SQLite.Exception{
@@ -567,7 +578,7 @@ public class DatabaseAccessor implements SQLite.Trace, SQLite.Profile {
      * 
      * @param tablename
      */
-    public void flushDB(String tablename){
+    public void deleteTable(String tablename){
         try {
             System.out.println("Are you sure, you want to deleta table "+tablename+" (answer true / false)");
             System.out.println("A backup will be made to: '"+tablename+"_bkp'.");
