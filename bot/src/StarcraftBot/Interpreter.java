@@ -33,7 +33,7 @@ public class Interpreter {
     Interpreter(String name){this.name=name;}
     
     // public methods
-    public Query interpretTags(ArrayList<ArrayList> tags, String input) throws SparseSpecException {
+    public Query interpretTags(ArrayList<ArrayList> tags, String input, int exitcode) throws SparseSpecException {
         // NOTE: Right now the generator just if-elses through the tags specified in the database (or corpus/wordVals.txt)
         // It may be done in a smoother way...
         
@@ -41,11 +41,18 @@ public class Interpreter {
         String question = null;
         String action = null;
         String strobject = null;
+        String in = input;
         boolean foundq = false;
         boolean founda = false;
         boolean foundobj = false;
         boolean objplural = false;
-           
+        boolean gotQuery = false;
+        Query query = null;
+        int exit = exitcode;
+        if(exit == 1)
+            System.exit(0);
+        
+       
         // assuming length(tags) == length(inputs) CHECK!
 //        for (int i = 0; i < tags.length; i++){
 //            // first find the action!
@@ -62,80 +69,129 @@ public class Interpreter {
         ArrayList<ArrayList> taglist = tags;
         ListIterator<ArrayList> tagListitr = taglist.listIterator();
         // Find question first
+       while(!gotQuery)
+       {
+           tagListitr = taglist.listIterator();
        while(tagListitr.hasNext() && !foundq)
        {
            ArrayList<String> temp = tagListitr.next();
-           System.out.print(temp.get(0));
+          
            ListIterator<String> tempitr = temp.listIterator();
            while(tempitr.hasNext())
            {
                String tempstr = tempitr.next();
-               if(input.indexOf(tempstr) >= 0)
+               if(in.indexOf(tempstr) >= 0 && temp.get(0).equals("Q"))
                {
                    question = temp.get(1);
-                   System.out.println("Found a question!");
+                   //System.out.println("Found a question!");
                    foundq = true;
                    break;
                }
            }
        }
        // Then find the action
+       tagListitr = taglist.listIterator();
        while(tagListitr.hasNext() && !founda)
        {
            ArrayList<String> temp = tagListitr.next();
-           System.out.print(temp.get(0));
+         //  System.out.print(temp.get(0));
            ListIterator<String> tempitr = temp.listIterator();
            while(tempitr.hasNext())
            {
                String tempstr = tempitr.next();
-               if(input.indexOf(tempstr) >= 0)
+               if(in.indexOf(tempstr) >= 0 && temp.get(0).equals("A"))
                {
                    action = temp.get(1);
-                   System.out.println("Found a action!");
+                   //System.out.println("Found a action!");
                    founda = true;
                    break;
                }
            }
        }
+       // And then the target
+       tagListitr = taglist.listIterator();
        while(tagListitr.hasNext() && !foundobj)
        {
            ArrayList<String> temp = tagListitr.next();
-           System.out.print(temp.get(0));
+         //  System.out.print(temp.get(0));
            ListIterator<String> tempitr = temp.listIterator();
            while(tempitr.hasNext())
            {
                String tempstr = tempitr.next();
-               if(input.indexOf(tempstr) >= 0)
+               if(in.indexOf(tempstr) >= 0 && (temp.get(0).equals("U") || temp.get(0).equals("B")))
                {
                    strobject = temp.get(1);
-                   System.out.println("Found a object!");
+                 //  System.out.println("Found a object!");
                    foundobj = true;
                    break;
                }
            }
        }
-        Query query = null;
+       // Query query = null;
         if (action!=null && strobject != null){
             if(action!=null && strobject != null && question!= null)
+            {
                 query = new Query(action, strobject, question);
-            else
-                query = new Query(action, strobject);
-
+                return query;
+                
+            }
+//            else
+//            {
+//                query = new Query(action, strobject);
+//                return query;
+//            }
+        
+        }
+        // Follow up questions. TODO! Right now the user has to ask
+        // a completely new question. Make it so that the follow up is more natural!
+        Scanner scan = new Scanner(System.in);
+        if(question == null && action != null && strobject == null )
+        {
+            System.out.println("You clearly want to " + action + " something. What would you like to " + action + "?\n");
+            question = "who";
+        }
+        else if(question != null && action == null && strobject == null)
+        {
+            System.out.println( question + " what? Please clarify.");
+        }
+        else if(question == null && action == null && strobject != null)
+        {
+            System.out.println( "Ah, you're talking about " + strobject + "s. I know all about that! Ask me anything game related about " + strobject + ".");
+        }
+        else if(question == null && action != null && strobject != null)
+        {
+            System.out.println("So you would like to know how, why, when or where to " + action + " " + strobject + "s?");
+        }
+        else if(question != null && action == null && strobject != null)
+        {
+            System.out.println("You need to tell me what you want to do with " + strobject + ".");
+        }
+        System.out.println("User: ");
+        in = scan.nextLine();
+        try
+        {
+            exit = Integer.parseInt(in); 
+        }catch (NumberFormatException e) {
+                }
+        finally {}
+        if(exit == 1)
+            System.exit(0);
         // - - - - -
         //      NOTE: THESE SETTINGS MIGHT HAVE TO BE SET IN CONSTRUCTOR:
         // - - - - -
             // Set query member fields:
           //  query.setTokens(inputs);
             //query.setTags(tags);
-            if(strobject.endsWith("s"))
-                query.isPlural=true;
-            else
-                query.isPlural=false;
+//            if(strobject.endsWith("s"))
+//                query.isPlural=true;
+//            else
+//                query.isPlural=false;
 
 
-        return query;
+        
         }
-        else throw new SparseSpecException("(at least) Action and Target must be defined to generate Query");   
+       return query;
+       // else throw new SparseSpecException("(at least) Action and Target must be defined to generate Query");   
     }
     public String getReply(Query query, DatabaseAccessor dba){
         String reply;
@@ -299,6 +355,8 @@ public class Interpreter {
     class SparseSpecException extends Exception{
         public SparseSpecException(String message){
             super(message);
+                   
+            
         }
     }
 }
