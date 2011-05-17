@@ -17,10 +17,9 @@ public class Interpreter {
     Response lastResponse;
     String database;
     TreeMap<String,Response> responseData;
-    
     final String responseDatafile = "corpus/responseData.txt";
     String[] responseDataArray;
-    
+    Random random = new Random();
     String name = "Jeeves";
     
     // constr
@@ -37,17 +36,25 @@ public class Interpreter {
         // NOTE: Right now the generator just if-elses through the tags specified in the database (or corpus/wordVals.txt)
         // It may be done in a smoother way...
         
-        // ALSO NOTE: Right now there is no double checking. It's the LAST action/ target pair that will be used!
+       
+        
+        // Variables 
         String question = null;
         String action = null;
         String strobject = null;
+        String actor = null;
         String in = input;
+        String lastinput;
         boolean foundq = false;
         boolean founda = false;
         boolean foundobj = false;
+        boolean foundactor = false;
         boolean objplural = false;
         boolean gotQuery = false;
         Query query = null;
+        
+        
+        
         int exit = exitcode;
         if(exit == 1)
             System.exit(0);
@@ -121,27 +128,56 @@ public class Interpreter {
                if(in.indexOf(tempstr) >= 0 && (temp.get(0).equals("U") || temp.get(0).equals("B")))
                {
                    strobject = temp.get(1);
-                 //  System.out.println("Found a object!");
+                   System.out.println("Found a object!");
                    foundobj = true;
                    break;
                }
            }
        }
+       //Time to fix the actor as well
+       tagListitr = taglist.listIterator();
+       while(tagListitr.hasNext() && !foundactor)
+       {
+           ArrayList<String> temp = tagListitr.next();
+         //  System.out.print(temp.get(0));
+           ListIterator<String> tempitr = temp.listIterator();
+           while(tempitr.hasNext())
+           {
+               String tempstr = tempitr.next();
+               if(in.indexOf(tempstr) >= 0 && (temp.get(0).equals("U") || temp.get(0).equals("B")))
+               {
+                   if(!tempstr.equals(strobject))
+                   {
+                       actor = temp.get(1);
+                   
+                   System.out.println("Found an actor!");
+                       foundactor = true;
+                       break;
+                   }
+               }
+           }
+       }
        // Query query = null;
         if (action!=null && strobject != null){
-            if(action!=null && strobject != null && question!= null)
+            if(action!=null && strobject != null && question!= null && actor == null)
             {
                 query = new Query(action, strobject, question);
                 return query;
                 
             }
-//            else
-//            {
-//                query = new Query(action, strobject);
-//                return query;
-//            }
+            else if(action!=null && strobject != null && question!= null && actor != null)
+            {
+                query = new Query(action, strobject, question, actor);
+                return query;
+            }
         
         }
+         //Strings for follow-up questions
+        String[] noAction = new String[]{"You need to tell me what you want to do with " + strobject + "s.",
+        "Ah, " + strobject + "s, gotcha. Now, please let me know what you want to do with it.",
+        "You mention " + strobject + "s. What do you wish to know about " + strobject + "s?"
+        };
+        
         // Follow up questions. TODO! Right now the user has to ask
         // a completely new question. Make it so that the follow up is more natural!
         Scanner scan = new Scanner(System.in);
@@ -165,10 +201,19 @@ public class Interpreter {
         }
         else if(question != null && action == null && strobject != null)
         {
-            System.out.println("You need to tell me what you want to do with " + strobject + ".");
+           // System.out.println("You need to tell me what you want to do with " + strobject + ".");
+            System.out.println(noAction[random.nextInt(3)]);
         }
+        lastinput = in;
         System.out.println("User: ");
         in = scan.nextLine();
+        while(in.equals(lastinput))
+        {
+            System.out.print("You're repeating yourself and it's not helping! \n");
+            System.out.println("User: ");
+            lastinput = in;
+            in = scan.nextLine();
+        }
         try
         {
             exit = Integer.parseInt(in); 
