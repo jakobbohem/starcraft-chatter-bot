@@ -12,7 +12,7 @@ Q-what
 Q-yn-do-does-can
 A-build-construct-produce
 A-counter-defeat-works well against
-A-upgrade-improve-make better
+A-upgrade-improve-make better-upgrading
 U-marine-marines
 U-zergling-zerglings
 U-firebat-firebats
