@@ -54,7 +54,12 @@ public class AnswerBuilder {
     public String getAnswer(int qID, Query query) throws IOException, DatabaseException {
         String answer = "";
         try {
-            String cannedPhrase = dba.getCannedPhrase(qID); //"%object&name&p% is %action&p% at %object&buildsAt&o%";//dba.getCannedPhrase(qID);
+            String cannedPhrase = null;
+            if (qID == 0)
+                answer = "I don't have an answet to that in my database, sorry!";
+            else
+            {
+                cannedPhrase = dba.getCannedPhrase(qID).replace(".","&"); //"%object&name&p% is %action&p% at %object&buildsAt&o%";//dba.getCannedPhrase(qID);
             String action = query.action;
 
             ItemCard actor = null;
@@ -200,6 +205,7 @@ public class AnswerBuilder {
             }
             if(answer.equals(""))
                 answer = "DEBUG: Answer empty. Need canned phrase";
+            }
             return answer+".";
         } catch (SQLite.Exception sqle) {
             System.out.print("SQLite error in 'AnswerBuilder'.");

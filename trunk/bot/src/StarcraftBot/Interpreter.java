@@ -411,12 +411,12 @@ public class Interpreter {
     }
     
     
-    // exceptions
-    class SparseSpecException extends Exception{
+   
+}
+class SparseSpecException extends Exception{
         public SparseSpecException(String message){
             super(message);
-                   
-            
+
+
         }
     }
-}

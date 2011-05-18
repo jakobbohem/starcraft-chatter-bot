@@ -346,10 +346,6 @@ public class DatabaseAccessor implements SQLite.Trace, SQLite.Profile {
         
         return (ItemCard)readBlob(lineNo);
     }
-    public long getDefaultQID() throws SQLite.Exception {
-        return getInt("select queryId from "+qTable);
-    }
-
     public List<ItemCard> getAllItemCards() throws DatabaseException, SQLite.Exception{
         List<ItemCard> res = new ArrayList<ItemCard>();
         String query = "select id from "+unitsTable;

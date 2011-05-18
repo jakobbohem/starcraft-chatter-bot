@@ -4,6 +4,7 @@
  */
 package StarcraftBot;
 
+import StarcraftBot.DatabaseAccessor.DatabaseException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -13,12 +14,9 @@ import java.util.logging.Logger;
  */
 public class QuestionBuilder {
     
-    long defaultQID;
-    
     private DatabaseAccessor dba;
     public QuestionBuilder(DatabaseAccessor dba) throws SQLite.Exception{
         this.dba = dba;
-        defaultQID = dba.getDefaultQID();
     }
     
     public int getQID(Query q) {
@@ -27,10 +25,16 @@ public class QuestionBuilder {
             return dba.getQid(md);
         }
         //This class could possibly be used to define what keywords to search for to narrow down the search in case of multiple answers.
-        catch (Exception ex) {
-            return (int) defaultQID;
+        catch (DatabaseException ex) {
+            return 0;
+        } catch(SparseSpecException ex){
+            return 0;
+        }catch(SQLite.Exception ex){
+            return 0;
         }
     }
+
+
     
     
     //This class could possibly be used to define what keywords to search for to narrow down the search in case of multiple answers.
