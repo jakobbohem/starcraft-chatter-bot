@@ -159,7 +159,7 @@ public class Interpreter {
                            System.out.println("Alright, I understand.\n");
                            actor = temp.get(1);
                    
-                            System.out.println("actor is " + actor);
+                            //System.out.println("actor is " + actor);
                             foundactor = true;
                             break;
                            // Need to manipulate query 
@@ -169,7 +169,7 @@ public class Interpreter {
                            System.out.println("Alright, I understand, you don't.\n");
                            actor = temp.get(1);
                    
-                           System.out.println("actor is " + actor);
+                           //System.out.println("actor is " + actor);
                            foundactor = true;
                            break;
                        }
@@ -179,7 +179,7 @@ public class Interpreter {
                      
                            actor = temp.get(1);
                    
-                           System.out.println("actor is " + actor);
+                           //System.out.println("actor is " + actor);
                            foundactor = true;
                            break;
                    }
