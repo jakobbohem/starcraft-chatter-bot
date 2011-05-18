@@ -135,7 +135,7 @@ public class AnswerBuilder {
                     String objectField = sphM.group();
                     
                     char grammar = 'o';
-                    if(sphM.find());
+                    if(sphM.find())
                         grammar = sphM.group().charAt(0);
 
                     if (objectField.equals("name")) {
@@ -204,7 +204,7 @@ public class AnswerBuilder {
                 phM.reset(answer);
             }
             if(answer.equals(""))
-                answer = "DEBUG: Answer empty. Need canned phrase";
+                answer = "I know that I know this, but I don't know how to explain it.";
             }
             return answer+".";
         } catch (SQLite.Exception sqle) {
