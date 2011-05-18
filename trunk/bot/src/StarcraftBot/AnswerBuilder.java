@@ -59,7 +59,7 @@ public class AnswerBuilder {
                 answer = "I don't have an answet to that in my database, sorry!";
             else
             {
-                cannedPhrase = dba.getCannedPhrase(qID).replace(".","&"); //"%object&name&p% is %action&p% at %object&buildsAt&o%";//dba.getCannedPhrase(qID);
+                cannedPhrase = dba.getCannedPhrase(qID); //"%object&name&p% is %action&p% at %object&buildsAt&o%";//dba.getCannedPhrase(qID);
             String action = query.action;
 
             ItemCard actor = null;
