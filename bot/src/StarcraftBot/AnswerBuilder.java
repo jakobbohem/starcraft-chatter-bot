@@ -147,6 +147,8 @@ public class AnswerBuilder {
                         replacement = readSize(item, grammar);
                     } else if (objectField.equals("buildingTier")) {
                         replacement = readBuildingTier(item, grammar);
+                    } else if (objectField.equals("upgradeAt")) {
+                        replacement = readUpgradeAt(item, grammar);
                     }
                     if(replacement.isEmpty())
                         replacement = "[unknown]";
