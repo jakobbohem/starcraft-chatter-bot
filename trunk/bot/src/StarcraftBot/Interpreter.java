@@ -45,6 +45,7 @@ public class Interpreter {
         String actor = null;
         String in = input.toLowerCase();
         String lastinput;
+        String yesno;
         boolean foundq = false;
         boolean founda = false;
         boolean foundobj = false;
@@ -53,7 +54,7 @@ public class Interpreter {
         boolean gotQuery = false;
         Query query = null;
         
-        
+        Scanner scan = new Scanner(System.in);
         
         int exit = exitcode;
         if(exit == 1)
@@ -90,7 +91,7 @@ public class Interpreter {
                if(in.indexOf(tempstr) >= 0 && temp.get(0).equals("Q"))
                {
                    question = temp.get(1);
-                   //System.out.println("Found a question!");
+                 //  System.out.println("question is: " + question);
                    foundq = true;
                    break;
                }
@@ -109,7 +110,7 @@ public class Interpreter {
                if(in.indexOf(tempstr) >= 0 && temp.get(0).equals("A"))
                {
                    action = temp.get(1);
-                   //System.out.println("Found a action!");
+             //     System.out.println(action);
                    founda = true;
                    break;
                }
@@ -128,7 +129,7 @@ public class Interpreter {
                if(in.indexOf(tempstr) >= 0 && (temp.get(0).equals("U") || temp.get(0).equals("B")))
                {
                    strobject = temp.get(1);
-                 //  System.out.println("Found a object!");
+                  // System.out.println(strobject);
                    foundobj = true;
                    break;
                }
@@ -146,13 +147,41 @@ public class Interpreter {
                String tempstr = tempitr.next();
                if(in.indexOf(tempstr) >= 0 && (temp.get(0).equals("U") || temp.get(0).equals("B")))
                {
-                   if(!tempstr.equals(strobject))
+                  // System.out.println("I'm here now");
+                   if(in.indexOf("with " + tempstr) >= 0)
                    {
-                       actor = temp.get(1);
+                       System.out.println("Just to clarify, you are the one controlling the " + temp.get(1) + "s, right?\n");
+                       System.out.println("User: ");
+                       yesno = scan.nextLine();
+                       yesno = yesno.toLowerCase();
+                       if(yesno.equals("yes") || yesno.equals("yeah"))
+                       {
+                           System.out.println("Alright, I understand.\n");
+                           actor = temp.get(1);
                    
-                   //System.out.println("Found an actor!");
-                       foundactor = true;
-                       break;
+                            System.out.println("actor is " + actor);
+                            foundactor = true;
+                            break;
+                           // Need to manipulate query 
+                       }
+                       else if(yesno.equals("no") || yesno.equals("nope"))
+                       {
+                           System.out.println("Alright, I understand, you don't.\n");
+                           actor = temp.get(1);
+                   
+                           System.out.println("actor is " + actor);
+                           foundactor = true;
+                           break;
+                       }
+                   }
+                   else if(!tempstr.equals(strobject) && !tempstr.equals(strobject + "s"))
+                   {
+                     
+                           actor = temp.get(1);
+                   
+                           System.out.println("actor is " + actor);
+                           foundactor = true;
+                           break;
                    }
                }
            }
@@ -168,6 +197,8 @@ public class Interpreter {
             else if(action!=null && strobject != null && question!= null && actor != null)
             {
                 query = new Query(action, strobject, question, actor);
+                                
+
                 return query;
             }
         
@@ -199,7 +230,7 @@ public class Interpreter {
         
         // Follow up questions. TODO! Right now the user has to ask
         // a completely new question. Make it so that the follow up is more natural!
-        Scanner scan = new Scanner(System.in);
+        
         if(question == null && action == null && strobject == null && actor == null)
         {
             System.out.println(noKeywords[random.nextInt(3)]);
@@ -220,7 +251,6 @@ public class Interpreter {
         }
         else if(question == null && action != null && strobject != null)
         {
-            //System.out.println("So you would like to know how, why, when or where to " + action + " " + strobject + "s?");
             return query = new Query( action, strobject,"how");
         }
         else if(question != null && action == null && strobject != null)
