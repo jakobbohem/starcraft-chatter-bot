@@ -6,7 +6,6 @@ package StarcraftBot;
 
 import java.util.*;
 import StarcraftBot.DatabaseAccessor.DatabaseException; // for database read/write issues
-import StarcraftBot.Interpreter.SparseSpecException; // for lack of information in input issues
 import StarcraftBot.Tagger.ExecutionOrderException; // general Exception for bad coding issues (CATCH INSIDE?)
 import java.io.IOException; //Thrown by the AnswerBuilder in case there's something wrong with the ItemCards.
 
@@ -25,7 +24,7 @@ public class Bot {
         //DbTests.createSingleMarineDB("corpus/database");
         DatabaseAccessor dba = new DatabaseAccessor();
         
-       DbTests.test2(dba);
+//       DbTests.test2(dba);
 //        DbTests.testAdders(dba);
 
         // Run program

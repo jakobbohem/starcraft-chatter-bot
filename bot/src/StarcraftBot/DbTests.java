@@ -38,18 +38,16 @@ public class DbTests {
                 ItemCard marineCard = new ItemCard("MAKE_");
                 Tools.printCard(marineCard);
                 int rownumber = dba.write(marineCard); // this throws!
-                dba.delete(rownumber);
-
-                System.out.println(" - Trying to read some downloaded cards - ");
-                ItemCard c = dba.getItemCard("high_templar");
-                Tools.printCard(c);
-                c = dba.getItemCard("high_templar");
-                Tools.printCard(c);
-                System.out.printf("Type of %s is %s!\n",c.name, c.type);
+                dba.delete(rownumber);                
             }
             catch(DatabaseException e){
                 System.out.println("Couldn't write card. OK!");
             }
+                System.out.println(" - Trying to read some downloaded cards - ");
+                ItemCard c = dba.getItemCard("high_templar");
+                Tools.printCard(c);
+
+                System.out.printf("Type of %s is %s!\n",c.name, c.type);
                 dba.updateItemCard("Marine", "buildsAt: Barracks", "buildTime: 24");
                 ItemCard newItem = dba.getItemCard("Marine");
                 Tools.printCard(newItem);

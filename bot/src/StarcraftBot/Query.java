@@ -3,6 +3,10 @@
  * and open the template in the editor.
  */
 package StarcraftBot;
+
+import SQLite.Exception;
+import StarcraftBot.DatabaseAccessor.DatabaseException;
+
 /**
  *
  * @author jakob
@@ -78,22 +82,22 @@ public class Query {
         else return new String[] {""};
     }
     
-    public String[] buildSearchPhrase(DatabaseAccessor dba) throws Exception {
+    public String[] buildSearchPhrase(DatabaseAccessor dba) throws SparseSpecException, DatabaseException, Exception {
         if(hardCheckNotNull()){
             ItemCard objCard = dba.getItemCard(object);
             ItemCard aCard = dba.getItemCard(actor);
-            return new String[] {"action:"+action, "question:"+question, "object:"+objCard.type, "actor:"+aCard.type};
+            return new String[] {"action:"+action, "question:"+question, "object:"+objCard.type.toLowerCase(), "actor:"+aCard.type.toLowerCase()};
         }
         else if(checkNotNull()){
             ItemCard objCard = dba.getItemCard(object);
-            return new String[] {"question:"+question, "action:"+action, "object:"+objCard.type};
+            return new String[] {"question:"+question, "action:"+action, "object:"+objCard.type.toLowerCase()};
         }
         else if(baseCheckNotNull()){
             ItemCard objCard = dba.getItemCard(object);
-            return new String[] {"action:"+action, "object:"+objCard.type};
+            return new String[] {"action:"+action, "object:"+objCard.type.toLowerCase()};
             
         }
-        throw new java.lang.Exception("Not enough labels!");
+        throw new SparseSpecException("Not enough labels!");
     }
 
     // setter methods:
