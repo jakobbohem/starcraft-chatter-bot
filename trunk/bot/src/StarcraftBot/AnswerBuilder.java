@@ -337,6 +337,44 @@ public class AnswerBuilder {
     }
     
     /**
+     * Reads the strongAgainst field. Checks if it's there (if not, throw exception). 
+     * Returns a properly formatted list, like "a, b, c and d", grammarised using
+     * 'grammar'.
+     * @param item Contains the field.
+     * @param grammar How to grammarise the field.
+     * @return Formatted string.
+     * @throws ItemCardException if the field is empty.
+     */
+    private String readStrongAgainst(ItemCard item, char grammar) throws ItemCardException {
+        if (item.strongAgainst== null) {
+            throw new ItemCardException("missing field",new String[]{"strongAgainst"});
+        }
+        
+        String[] strongAgainst = item.strongAgainst;
+        
+        if (strongAgainst.length==0) {
+            throw new ItemCardException("empty field",new String[]{"strongAgainst"});
+        } else if (strongAgainst.length == 1) {
+            return String.format("%s",
+                    geNoun(strongAgainst[0],grammar));
+        } else if (strongAgainst.length == 2) {
+            return String.format("%s and %s",
+                    geNoun(strongAgainst[0],grammar),
+                    geNoun(strongAgainst[1],grammar));
+        } else {
+            String returnStr = returnStr = String.format("%s",
+                    geNoun(strongAgainst[0],grammar));
+            for (int i = 1; i < strongAgainst.length - 1; i++) {
+                returnStr += String.format(", %s",
+                        geNoun(strongAgainst[i],grammar));
+            }
+            returnStr = returnStr += String.format(" and %s",
+                    geNoun(strongAgainst[strongAgainst.length-1],grammar));
+            return returnStr;
+        }
+    }
+    
+    /**
      * Reads the counter field. Checks if it's there (if not, throw exception). 
      * Returns a properly formatted list, like "a, b, c and d", grammarised using
      * 'grammar'.
