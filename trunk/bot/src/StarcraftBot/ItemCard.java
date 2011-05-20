@@ -9,8 +9,9 @@ import java.util.logging.Logger;
 import java.util.*;
         
 /**
- *
- * @author jakob
+ * Contains all the information regarding the objects of the topic of the bot, 
+ * in this case Starcraft. The cards are stored as blobs in the database.. 
+ * 
  */
 public class ItemCard implements Serializable {
     // member fields:
@@ -40,10 +41,16 @@ public class ItemCard implements Serializable {
     String nUnits;
             
     // constr;
+    /**
+     * A constructor for test purposes.
+     * @param itemType The "type" of the object
+     * @param name  The name of the object
+     */
     public ItemCard(String itemType, String name){
         this.type=itemType;
         this.name=name;
     }
+    
     public ItemCard(String name) {
             // just create a simple unit (marine) for now. then read from database.
                 

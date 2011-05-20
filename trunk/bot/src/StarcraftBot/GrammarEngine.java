@@ -1,5 +1,10 @@
 package StarcraftBot;
 
+/**
+ * A static class which can apply some basic grammar rules to verbs and nouns.
+ * @author anton sorensen
+ */
+
 public class GrammarEngine {
 	
 	/**
@@ -56,7 +61,7 @@ public class GrammarEngine {
 	/**
 	 * Puts an "a" or an "an" before a noun, depending on whether or not the first letter is a vowel.
 	 * @param noun The noun
-	 * @return A string consisting of "a \<noun\>" or "an \<noun\>"
+	 * @return A string consisting of "a <code>noun</code>" or "an <code>noun</code>".
 	 */
 	public static String nounIndefinite(String noun){
 		if (isVowel(noun.toLowerCase().charAt(0)))
