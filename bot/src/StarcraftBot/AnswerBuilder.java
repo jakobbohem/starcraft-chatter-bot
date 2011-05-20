@@ -10,16 +10,16 @@ import java.io.IOException; //Thrown in case the answer needs an ItemCard which 
 import StarcraftBot.DatabaseAccessor.DatabaseException;
 
 /**
- * Creates an answer String from a query and a question-id. The file should be 
- * constructed with the databaseaccessor which accesses the database you're going
+ * Creates an answer String from a query and a question-id. The constructor associates
+ * the AnswerBuilder with a DatabaseAccessor which accesses the database you're going
  * to use. Then just call AnswerBuilder.getAnswer(qID, query) and you'll get a 
  * string returned (or an exception. there's a lot of those) which can be 
- * presented to the user.
+ * presented to the user.<br>
  * 
  * 
  * Notes for usage: The cannedPhrase string in the database should use placeholders
  * on the form %object&objectField&grammarTag%. If the object is "action", the
- * objectField mustn't be present. The grammarTag is defined as:
+ * objectField mustn't be present. The grammarTag is defined as:<br>
  * <b>Nouns</b>:<br>
  *  i: <i>indefinite singular</i> (a marine)<br>
  *  p: <i>plural</i> (marines)<br>
@@ -46,9 +46,8 @@ public class AnswerBuilder {
      * answer from the database.
      * @param query The query which was sent to the database. Used to get proper
      * phrasing.
-     * @param actor The object or unit which is the focus of the query.
-     * @param items All the other StarCraft objects which are relevant to the query.
-     * @param dba Needed to access the database.
+     * @throws IOException Unhandled exception from the DatabaseAccessor
+     * @throws DatabaseException Unhandled exception from the DatabaseAccessor
      * @return The finished answer.
      */
     public String getAnswer(int qID, Query query) throws IOException, DatabaseException {
@@ -531,13 +530,5 @@ public class AnswerBuilder {
             return GrammarEngine.nounIndefinite(noun);
         else
             return noun;
-    }
-    
-    public String testMethod(ItemCard icTest, ItemCard icTest2, char gram) throws ItemCardException{
-        if(isInCounter(icTest2,icTest))
-            return "yes";
-        else
-            return "no";
-    
     }
 }
