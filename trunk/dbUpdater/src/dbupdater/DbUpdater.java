@@ -20,28 +20,34 @@ public class DbUpdater {
      */
     public static void main(String[] args) {
         try{
+            // just use console for now.
+            runAddConsole();
+
+
+
+
         // example of data that's pulled from somewhere (like the unknown DB)
-            if(args.length>0){
-                // use arguments to choose function
-                
-            }
-            else{
-                // choose from user input
-                Scanner input = new Scanner(System.in);
-                System.out.println("what would you like to do?");
-                String mode = input.nextLine();
-                if(mode.toLowerCase().equals("extenddb"))
-                    extendDB_poc();
-                else if(mode.toLowerCase().equals("addconsole"))
-                    runAddConsole();
-                else if(mode.toLowerCase().equals("addcsv")) //ashwin is writing this program
-                    runAddCSV();
-                else if (mode.toLowerCase().equals("html"))
-                    System.out.println("//HTMLParser.run();");
-                else
-                System.out.println(String.format("Mode '%s' not available. Try 'extenddb','addconsole' or 'addcsv'",mode));
-                // do nothing
-            }
+//            if(args.length>0){
+//                // use arguments to choose function
+//
+//            }
+//            else{
+//                // choose from user input
+//                Scanner input = new Scanner(System.in);
+//                System.out.println("what would you like to do?");
+//                String mode = input.nextLine();
+//                if(mode.toLowerCase().equals("extenddb"))
+//                    extendDB_poc();
+//                else if(mode.toLowerCase().equals("addconsole"))
+//                    runAddConsole();
+//                else if(mode.toLowerCase().equals("addcsv")) //ashwin is writing this program
+//                    runAddCSV();
+//                else if (mode.toLowerCase().equals("html"))
+//                    System.out.println("//HTMLParser.run();");
+//                else
+//                System.out.println(String.format("Mode '%s' not available. Try 'extenddb','addconsole' or 'addcsv'",mode));
+//                // do nothing
+//            }
         }// end of try
         catch(java.lang.Exception e){
             System.err.println("caught exception in main!!");
@@ -53,9 +59,38 @@ public class DbUpdater {
     private static void runAddCSV(){
 
     }
-    private static void runAddConsole(){
-        System.out.println(" - Running interactive add-to-database program -");
+    private static void runAddConsole() throws DatabaseException, IllegalArgumentException, IOException, Exception, ItemCardException{
+        System.out.println(" - Running interactive add-to-database program (1 to quit) -");
+        String dbfile = "../bot/corpus/database";
+        DatabaseAccessor dba = new DatabaseAccessor(dbfile);
+        Scanner s = new Scanner(System.in);
+        int exitcode = 0;
+        
+        while(exitcode!=1){
+            System.out.println("what unit would you like to update?");
+            String theUnit = s.nextLine();
+            String input = theUnit;
+            try{
+                exitcode = Integer.parseInt(input);
+                if(exitcode==1)
+                    break;
+            }catch(NumberFormatException e){}
+            System.out.print("enter a comma-separated list of the fields you would like to update:");
+            input = s.nextLine();
 
+            String[] fields = input.split(",");
+            if(!fields[0].isEmpty()){
+                String[] upgrades = new String[fields.length];
+                for (int i = 0;i<fields.length;i++){
+                    System.out.println("Enter value for: "+fields[i]);
+                    String val = s.nextLine();
+                    upgrades[i] = fields[i]+":"+val;
+                }
+                dba.updateItemCard(theUnit, upgrades);
+            }
+            Tools.printCard(dba.getItemCard(theUnit));
+       }
+       dba.close();
     }
     private static void extendDB_poc() throws IOException, DatabaseException, IllegalArgumentException, Exception, ItemCardException {
         
