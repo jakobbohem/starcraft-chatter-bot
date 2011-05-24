@@ -23,7 +23,12 @@ import StarcraftBot.Tools;
 
 
 
-/**
+/** The HTMLParser object creates a pipe to the Starcraft Encyclopedia at TeamLiquid,
+ * a Starcraft information wiki and parses the relevant information for our database.
+ * It is created in an attempt to illustrate the possibility of downloading this
+ * sort of information from online. The program works well right now, writing some
+ * basic Starcraft unit- and building information to the database.
+ * The missing fields can then be filled in manually by running the DbUpdater-program.
  *
  * @author jakob
  */
@@ -37,12 +42,28 @@ public class HTMLParser {
         try {
             
             HTMLParser p = new HTMLParser();
-            p.updateItemCardsOnline("itemsList.txt");
+            String[] updatedCards = p.updateItemCardsOnline("itemsList.txt");
+            Scanner s = new Scanner(System.in);
+            System.out.printf("Added/Updated %d entries to the database.\n"
+                    + "would you like to complete them with missing information now?\n", updatedCards.length);
+            String command = s.nextLine();
+            if(command.toLowerCase().equals("yes")||command.toLowerCase().equals("y")){
+                DbUpdater.runAddConsole(updatedCards);
+            }
+            else{
+                System.out.println("Would you like to manually specify other itemCards to update?");
+                command = s.nextLine();
+                if(command.toLowerCase().equals("yes")||command.toLowerCase().equals("y")){
+                    DbUpdater.runAddConsole();
+                }
+                else return; // do nothing.
+            }
+
+            System.out.println("end of file...");
             
         } catch (java.lang.Exception ex) {
             System.err.println("Caught exception when doing HTMLParser dbUpdate!");
             System.err.println(ex.getMessage());
-            ex.printStackTrace();
         }
     }
     
@@ -55,6 +76,7 @@ public class HTMLParser {
                 System.out.println(inputline);
             in.close();
     }
+    // not done... (recursive?)
     private void listTree(Element base){
         int depth = base.getDepth();
         
@@ -127,8 +149,9 @@ public class HTMLParser {
 //			}
 //		};
     }
-    public void updateItemCardsOnline(String urlEndingsFile) throws IOException, IllegalArgumentException, Exception, ItemCardException{
+    public String[] updateItemCardsOnline(String urlEndingsFile) throws IOException, IllegalArgumentException, Exception, ItemCardException{
         ArrayList<String> fromFile = Tools.ReadFile(urlEndingsFile);
+        ArrayList<String> cardsUpdated = new ArrayList<String>();
 
         String[] endings = fromFile.toArray(new String[fromFile.size()]);
         for (int i = 0;i<endings.length;i++){
@@ -149,6 +172,9 @@ public class HTMLParser {
                 int row = dba.updateItemCard(name, updates.toArray(new String[updates.size()]));
                 System.out.printf(" - updated itemCard '%s' on line %d \n",name, row);
                 Tools.printCard(dba.getItemCard(name));
+                // add card updated to list of cards modified:
+                cardsUpdated.add(name);
+
             } catch(DatabaseException e){
                 System.err.printf("Couldn't update database for %s!\n", name);
                 System.err.println(e.getMessage());
@@ -156,8 +182,20 @@ public class HTMLParser {
             }
             dba.close();
         }
+        
         System.out.println("Finished updating database!");
+        return cardsUpdated.toArray(new String[cardsUpdated.size()]);
+
     }
+    /** Connects to http://wiki.teamliquid.net/starcraft/ to find Starcraft unit
+     * data to download. The parser assumes a static site layout and isolated a
+     * certain HTML division tag to extract the appropriate information.
+     *
+     * @param itemName is the end of the URL to attempt to access e.g. "marine"
+     * @return a list of arguments to pass to the {@link DatabaseAccessor#updateItemCard  updateItemCard}
+     * method in {@link DatabaseAccessor}.
+     * @throws IOException
+     */
     public ArrayList<String> getItemCardUpdates(String itemName) throws IOException{
 
         ArrayList<String> updates = new ArrayList<String>();
